@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+@page { size: A4; margin: 0; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 13pt;
+  line-height: 1.9;
+  color: #333;
+  width: 210mm;
+  margin: 0 auto;
+  background: #fff;
+}
+
+/* ===== 封面（整页，无 margin 干扰） ===== */
+.cover {
+  width: 210mm;
+  height: 297mm;
+  page-break-after: always;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+  padding: 40mm 30mm;
+}
+.cover .badge {
+  background: #4a6cf7; color: #fff; padding: 6px 22px;
+  border-radius: 20px; font-size: 12pt; margin-bottom: 20px;
+}
+.cover h1 {
+  font-size: 28pt; color: #1a1a2e; line-height: 1.3;
+  margin-bottom: 12px; border: none;
+}
+.cover .tagline {
+  font-size: 15pt; color: #4a6cf7; font-weight: 500; margin-bottom: 25px;
+}
+.cover .divider { width: 60px; height: 3px; background: #4a6cf7; margin: 0 auto 20px; border-radius: 2px; }
+.cover .meta { font-size: 12pt; color: #666; line-height: 2; }
+.cover .meta b { color: #444; }
+.cover .slogan {
+  margin-top: 40px; padding: 14px 28px;
+  background: rgba(74,108,247,0.08); border-radius: 8px;
+  font-size: 12pt; color: #4a6cf7; font-weight: 500;
+}
+
+/* ===== 目录 ===== */
+.toc {
+  page-break-after: always;
+  padding: 30mm 25mm;
+  font-size: 12pt;
+}
+.toc h2 { font-size: 20pt; color: #1a1a2e; margin-bottom: 20px; border-bottom: 2px solid #4a6cf7; padding-bottom: 10px; }
+.toc-item { display: flex; padding: 8px 0; border-bottom: 1px dashed #e5e7eb; }
+.toc-item .num { color: #4a6cf7; font-weight: 600; width: 50px; flex-shrink: 0; }
+.toc-item .title { flex: 1; color: #333; }
+.toc-sub { padding-left: 50px; }
+.toc-sub .num { color: #888; }
+
+/* ===== 正文 ===== */
+.content { padding: 20mm 25mm; }
+
+h1 {
+  font-size: 22pt; color: #1a1a2e; margin: 0 0 18px 0;
+  padding-bottom: 10px; border-bottom: 2px solid #4a6cf7;
+}
+h1.first { margin-top: 0; }
+
+h2 {
+  font-size: 16pt; color: #2d3a6e; margin: 24px 0 12px 0;
+  padding-left: 12px; border-left: 4px solid #4a6cf7;
+}
+h3 { font-size: 14pt; color: #444; margin: 18px 0 8px 0; }
+p { margin: 10px 0; text-align: justify; }
+ul, ol { margin: 10px 0 10px 24px; }
+li { margin: 5px 0; }
+
+table {
+  width: 100%; border-collapse: collapse; margin: 14px 0;
+  font-size: 12pt; page-break-inside: avoid;
+}
+th { background: #4a6cf7; color: #fff; padding: 8px 10px; text-align: left; font-weight: 600; }
+td { padding: 7px 10px; border: 1px solid #d1d5db; }
+tr:nth-child(even) td { background: #f8fafc; }
+tr:nth-child(odd) td { background: #fff; }
+
+.dialog {
+  background: #f8fafc; border: 1px solid #e5e7eb;
+  border-left: 4px solid #4a6cf7; border-radius: 6px;
+  padding: 14px 18px; margin: 14px 0;
+  font-size: 12.5pt; line-height: 1.9;
+}
+.dialog .child { color: #4a6cf7; font-weight: 500; }
+.dialog .ai { color: #d97706; font-weight: 500; }
+
+.flow {
+  background: #f0f4ff; border: 1px solid #d0d9f0; border-radius: 8px;
+  padding: 16px 20px; margin: 14px 0; text-align: center;
+  font-size: 12.5pt; line-height: 2.2;
+}
+.flow .arrow { color: #4a6cf7; font-size: 13pt; font-weight: 700; display: block; }
+.flow .step {
+  display: inline-block; background: #fff; border: 1px solid #4a6cf7;
+  border-radius: 4px; padding: 4px 14px; margin: 2px 0; color: #333;
+}
+.flow .step-active { background: #4a6cf7; color: #fff; font-weight: 600; }
+
+.box {
+  background: #f0f4ff; border: 1px solid #d0d9f0; border-radius: 8px;
+  padding: 14px 18px; margin: 14px 0; page-break-inside: avoid;
+}
+.box .label { font-weight: 600; color: #4a6cf7; margin-bottom: 6px; font-size: 12.5pt; }
+.box ul { margin: 6px 0 6px 20px; }
+.box li { margin: 3px 0; }
+
+.goal {
+  background: linear-gradient(135deg, #f0f4ff, #e8f0fe);
+  border: 1px solid #d0d9f0; border-radius: 10px;
+  padding: 18px 22px; margin: 16px 0; text-align: center;
+  page-break-inside: avoid;
+}
+.goal .big { font-size: 16pt; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
+.goal .small { font-size: 12pt; color: #666; }
+
+.tag { display: inline-block; padding: 1px 10px; border-radius: 10px; font-size: 11pt; font-weight: 500; }
+.tag-a { background: #ffe4e6; color: #e11d48; }
+.tag-b { background: #fef3c7; color: #d97706; }
+.tag-c { background: #dbeafe; color: #2563eb; }
+
+.fusion {
+  background: #f0f4ff; border: 1px solid #d0d9f0; border-radius: 8px;
+  padding: 14px 20px; margin: 14px 0; font-size: 12.5pt; line-height: 2;
+}
+.pb { page-break-before: always; }
+</style>
+</head>
+<body>
+
+<!-- ===== 封面 ===== -->
+<div class="cover">
+  <div class="badge">缤果学伴（BingoMate）</div>
+  <h1>基于缤果学伴智能教辅的<br>因材施教实施方案</h1>
+  <div class="tagline">教辅数据化 → 智能体引导 → 一人一案精准施教</div>
+  <div class="divider"></div>
+  <div class="meta">
+    <b>文档版本：</b>v3.0（产品视角）<br>
+    <b>编制日期：</b>2026年7月31日<br>
+    <b>适用产品：</b>缤果学伴（BingoMate）家庭版
+  </div>
+  <div class="slogan">不是孩子翻书做题，而是智能体带着孩子学书</div>
+</div>
+
+<!-- ===== 目录 ===== -->
+<div class="toc">
+  <h2>目录</h2>
+  <div class="toc-item"><span class="num">一</span><span class="title">项目背景与产品定位</span></div>
+  <div class="toc-sub toc-item"><span class="num">1.1</span><span class="title">背景</span></div>
+  <div class="toc-sub toc-item"><span class="num">1.2</span><span class="title">产品定位</span></div>
+  <div class="toc-item"><span class="num">二</span><span class="title">智能教辅数据包（产品概念）</span></div>
+  <div class="toc-sub toc-item"><span class="num">2.1</span><span class="title">什么是智能教辅数据包？</span></div>
+  <div class="toc-sub toc-item"><span class="num">2.2</span><span class="title">数据包与 BingoMate 的融合方式</span></div>
+  <div class="toc-item"><span class="num">三</span><span class="title">学生画像与分层体系</span></div>
+  <div class="toc-sub toc-item"><span class="num">3.1</span><span class="title">学生档案结构（1+N 架构）</span></div>
+  <div class="toc-sub toc-item"><span class="num">3.2</span><span class="title">分层判定逻辑</span></div>
+  <div class="toc-sub toc-item"><span class="num">3.3</span><span class="title">三种分层学习模式对比</span></div>
+  <div class="toc-item"><span class="num">四</span><span class="title">产品交互流程设计</span></div>
+  <div class="toc-sub toc-item"><span class="num">4.1</span><span class="title">核心交互理念</span></div>
+  <div class="toc-sub toc-item"><span class="num">4.2</span><span class="title">典型交互场景</span></div>
+  <div class="toc-sub toc-item"><span class="num">4.3</span><span class="title">智能体引导规则</span></div>
+  <div class="toc-sub toc-item"><span class="num">4.4</span><span class="title">与现有 BingoMate 流程的衔接</span></div>
+  <div class="toc-item"><span class="num">五</span><span class="title">教辅转化实施流程</span></div>
+  <div class="toc-item"><span class="num">六</span><span class="title">产品设计原则</span></div>
+  <div class="toc-sub toc-item"><span class="num">6.1</span><span class="title">核心原则</span></div>
+  <div class="toc-sub toc-item"><span class="num">6.2</span><span class="title">技术架构理念</span></div>
+  <div class="toc-sub toc-item"><span class="num">6.3</span><span class="title">与 BingoMate 现有功能的关系</span></div>
+  <div class="toc-item"><span class="num">八</span><span class="title">待讨论议题</span></div>
+  <div class="toc-sub toc-item"><span class="num"></span><span class="title">议题一：学生初始水平定位方式</span></div>
+  <div class="toc-sub toc-item"><span class="num"></span><span class="title">议题二：教辅类型的划分与差异化设计</span></div>
+  <div class="toc-item"><span class="num">七</span><span class="title">附录</span></div>
+  <div class="toc-sub toc-item"><span class="num"></span><span class="title">附录A：学生初始建档模板</span></div>
+  <div class="toc-sub toc-item"><span class="num"></span><span class="title">附录B：智能体引导话术库</span></div>
+</div>
+
+<!-- ===== 正文 ===== -->
+<div class="content">
+
+<h1 class="first">一、项目背景与产品定位</h1>
+
+<h2>1.1 背景</h2>
+<p>传统教辅使用模式存在三大痛点：</p>
+<table>
+  <thead><tr><th style="width:18%">痛点</th><th>具体表现</th></tr></thead>
+  <tbody>
+    <tr><td><strong>千人一面</strong></td><td>同一本教辅，成绩好的学生觉得太简单，成绩弱的学生觉得太难，都无法精准匹配</td></tr>
+    <tr><td><strong>缺乏跟踪</strong></td><td>学生做了题，错了就错了，没有系统记录薄弱点，同样的错误反复犯</td></tr>
+    <tr><td><strong>被动学习</strong></td><td>学生按章节顺序刷题，不知道自己该练什么、不该练什么，效率低下</td></tr>
+  </tbody>
+</table>
+<p>而现有 BingoMate 产品已具备<strong>拍照识别、错题分析、薄弱项判定、学情同步</strong>等核心能力，但教辅内容仍停留在"纸质书→人工看"的阶段，智能体无法直接调用教辅内容进行个性化引导。</p>
+
+<h2>1.2 产品定位</h2>
+<div class="goal">
+  <div class="big">不是把纸质书变成电子书，<br>而是把教辅变成智能体可调用的知识资产</div>
+  <div class="small">孩子使用时只需说一声，智能体根据学情自动引导学习</div>
+</div>
+<p>孩子使用流程变化对比：</p>
+<table>
+  <thead><tr><th style="width:18%">维度</th><th style="width:38%">传统模式</th><th style="width:44%">智能教辅模式</th></tr></thead>
+  <tbody>
+    <tr><td>打开方式</td><td>孩子自己翻书找页数</td><td>孩子说"我要学xx教辅"</td></tr>
+    <tr><td>做题顺序</td><td>按章节顺序从头到尾</td><td>智能体根据学情安排最优路径</td></tr>
+    <tr><td>做错之后</td><td>自己看答案，不一定看懂</td><td>智能体名师1v1讲解+变式巩固</td></tr>
+    <tr><td>复习安排</td><td>自己翻错题本</td><td>智能体按遗忘曲线自动调度</td></tr>
+    <tr><td>家长视角</td><td>不知道孩子学了什么</td><td>实时看到教辅进度+掌握率</td></tr>
+  </tbody>
+</table>
+
+<div class="pb"></div>
+<h1>二、智能教辅数据包（产品概念）</h1>
+
+<h2>2.1 什么是智能教辅数据包？</h2>
+<p>每本教辅转化后形成一个独立的数据包，包含五类核心内容：</p>
+<table>
+  <thead><tr><th style="width:18%">数据资产</th><th style="width:38%">通俗理解</th><th style="width:44%">智能体怎么用</th></tr></thead>
+  <tbody>
+    <tr><td><strong>知识点图谱</strong></td><td>教辅的"目录升级版"——章→节→知识点→考点，以及知识点之间的前后依赖关系</td><td>定位薄弱点时，自动找到前置知识点一起补</td></tr>
+    <tr><td><strong>标签化题库</strong></td><td>每道题都打上了标签：难度、知识点、题型、适合哪类学生</td><td>根据学生分层推荐不同难度题目</td></tr>
+    <tr><td><strong>解题方法库</strong></td><td>教辅中"方法总结""易错提醒"等精华内容的集合</td><td>讲解时引用方法库，告诉学生"这类题通用的解法是什么"</td></tr>
+    <tr><td><strong>变式题生成规则</strong></td><td>每道典型题可以怎么改（改数据、改条件、改问法）</td><td>学生做对一道题后，自动生成变式题检验是否真会</td></tr>
+    <tr><td><strong>讲解风格模板</strong></td><td>三种讲解风格的话术模板</td><td>根据学生分层自动切换讲解风格</td></tr>
+  </tbody>
+</table>
+
+<h2>2.2 数据包与 BingoMate 的融合方式</h2>
+<p>数据包不独立运行，而是<strong>嵌入现有 BingoMate 学情体系</strong>，作为智能体的"知识弹药库"：</p>
+<div class="fusion">
+  孩子说："我想做数学同步训练"<br>
+  <span style="color:#4a6cf7; font-weight:700; display:block; text-align:center;">↓</span>
+  <strong style="color:#4a6cf7;">BingoMate 智能体</strong><br>
+  &nbsp;&nbsp;├── 读取学生档案（分层/薄弱项/学习风格）<br>
+  &nbsp;&nbsp;├── 加载对应教辅数据包（知识点图谱+题库+方法库）<br>
+  &nbsp;&nbsp;├── 结合学情计算最优路径（跳过已掌握、聚焦薄弱项）<br>
+  &nbsp;&nbsp;└── 生成个性化学习任务 → 引导孩子学习
+</div>
+
+<div class="pb"></div>
+<h1>三、学生画像与分层体系</h1>
+
+<h2>3.1 学生档案结构（1+N 架构）</h2>
+<p>一个基础档案 + 不断更新的动态标签：</p>
+<div class="box">
+  <div class="label">📋 基础信息层（建档时录入，可修改）</div>
+  <ul>
+    <li>姓名、年级、学校、教材版本</li>
+    <li>升学目标、每日学习时长、性格偏好</li>
+    <li>预设薄弱项、AI 反馈规则（给思路还是给答案）</li>
+  </ul>
+</div>
+<div class="box">
+  <div class="label">📊 学情数据层（每次做题后自动更新）</div>
+  <ul>
+    <li><strong>知识掌握度</strong>：每个知识点标注为"已掌握/基本掌握/薄弱/严重薄弱/未接触"</li>
+    <li><strong>六维能力</strong>：基础知识、计算能力、逻辑推理、阅读理解、解题规范、应试心态</li>
+    <li><strong>学习习惯</strong>：学习节奏、错误模式（粗心型/知识型/思路型）、提升速度</li>
+    <li><strong>错题与薄弱项库</strong>：按学科→章节→知识点→题型四级归档，按遗忘曲线调度复习</li>
+  </ul>
+</div>
+<div class="box">
+  <div class="label">🏷️ 分层标签层（系统每周自动判定）</div>
+  <ul>
+    <li><span class="tag tag-a">A层（优秀生）</span> 估占20%：综合能力强，需要挑战更高难度</li>
+    <li><span class="tag tag-b">B层（中等生）</span> 估占50%：基础尚可但有明显薄弱点，需要精准补弱</li>
+    <li><span class="tag tag-c">C层（薄弱生）</span> 估占30%：基础薄弱，需要重建信心和地基</li>
+  </ul>
+</div>
+
+<h2>3.2 分层判定逻辑</h2>
+<table>
+  <thead><tr><th style="width:30%">判定维度</th><th style="width:15%">权重</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td>近期作业/试卷正确率</td><td style="text-align:center">40%</td><td>近2周加权平均</td></tr>
+    <tr><td>已掌握知识点占比</td><td style="text-align:center">25%</td><td>绿色知识点占全部的比例</td></tr>
+    <tr><td>严重薄弱项数量</td><td style="text-align:center">20%</td><td>红色薄弱项越少越好</td></tr>
+    <tr><td>六维能力综合评分</td><td style="text-align:center">15%</td><td>六项能力的平均分</td></tr>
+  </tbody>
+</table>
+<p>分层不是一成不变的，每周根据最新学情数据重新评估，学生可升层或降层。</p>
+
+<h2>3.3 三种分层学习模式对比</h2>
+<table>
+  <thead><tr><th style="width:15%">对比维度</th><th style="width:28%"><span class="tag tag-a">A层·拓展深化</span></th><th style="width:28%"><span class="tag tag-b">B层·巩固提升</span></th><th style="width:29%"><span class="tag tag-c">C层·基础重建</span></th></tr></thead>
+  <tbody>
+    <tr><td><strong>学生特征</strong></td><td>基础扎实，常规题正确率高，容易"吃不饱"</td><td>基础基本掌握但不扎实，同样错误反复犯</td><td>概念模糊，公式记不住，做题靠猜，信心不足</td></tr>
+    <tr><td><strong>核心策略</strong></td><td>举一反三、竞赛拓展、跨章综合</td><td>精准补弱、变式训练、方法归纳</td><td>回归课本、阶梯递进、信心重建</td></tr>
+    <tr><td><strong>教辅使用方式</strong></td><td>教辅为底，向外拓展<br>快速通关基础题，聚焦压轴题</td><td>教辅为主线，精准打击<br>不从头刷，只做薄弱点对应的题</td><td>课本优先，教辅辅助<br>先确保课本例题100%会做</td></tr>
+    <tr><td><strong>题目难度配比</strong></td><td>基础:提升:压轴 = 2:3:5</td><td>基础:提升:压轴 = 4:4:2</td><td>基础:提升:压轴 = 7:2:1</td></tr>
+    <tr><td><strong>讲解风格</strong></td><td>启发式——引导思考，不给答案</td><td>引导式——先给思路再逐步展开</td><td>陪伴式——慢节奏、多鼓励、全拆解</td></tr>
+    <tr><td><strong>家长参与程度</strong></td><td>轻度，看报告即可</td><td>中度，确认任务、查看进展</td><td>深度，每日推送"陪伴指南"和"鼓励话术"</td></tr>
+    <tr><td><strong>目标</strong></td><td>保持A层，冲击竞赛</td><td>3-6个月晋升B→A</td><td>3-6个月晋升C→B</td></tr>
+  </tbody>
+</table>
+
+<div class="pb"></div>
+<h1>四、产品交互流程设计</h1>
+
+<h2>4.1 核心交互理念</h2>
+<div class="goal">
+  <div class="big">"孩子说一声，智能体带路"</div>
+  <div class="small">孩子不需要自己翻书找题、不需要自己决定先做哪章，直接通过自然语言与智能体对话，智能体根据学情自动匹配教辅内容</div>
+</div>
+
+<h2>4.2 典型交互场景</h2>
+
+<h3>场景一：启动教辅学习</h3>
+<div class="dialog">
+  <div><span class="child">👦 孩子：</span>我想学《数学同步训练》</div>
+  <div style="margin-top:6px;"><span class="ai">🤖 智能体：</span>好的！你上次做到第22章"一元二次方程"，当前薄弱项是"公式法"（正确率45%），我们先从第22.2节"公式法解方程"开始，预计需要25分钟，准备好了吗？</div>
+</div>
+
+<h3>场景二：做教辅中的题</h3>
+<div class="dialog">
+  <div><span class="child">👦 孩子：</span>开始吧</div>
+  <div style="margin-top:6px;"><span class="ai">🤖 智能体：</span>请打开教辅第38页第7题，用公式法解方程 2x²-5x+2=0。这道题考查"公式法"和"判别式"，是你当前的薄弱项。给你5分钟，做完告诉我答案</div>
+  <div style="margin-top:8px;"><span class="child">👦 孩子：</span>我算出来了，x=2和x=1/2</div>
+  <div style="margin-top:6px;"><span class="ai">🤖 智能体：</span>完全正确！🎉 来，再做一道变式题巩固一下——解方程 3x²-7x+2=0</div>
+</div>
+
+<h3>场景三：薄弱项攻克</h3>
+<div class="dialog">
+  <div><span class="ai">🤖 智能体：</span>这道题你又做错了，我们来看一下为什么。你的薄弱点是"判别式符号判断"。注意：Δ<0时方程无实数根，不要急着代入公式。我帮你切换到"基础重建"模式，重新讲一遍判别式的概念...</div>
+  <div style="margin-top:8px;"><span class="ai">🤖 智能体：</span>现在来做一道课本原题，确认你理解了</div>
+</div>
+
+<h3>场景四：学习总结</h3>
+<div class="dialog">
+  <div><span class="child">👦 孩子：</span>今天学完了</div>
+  <div style="margin-top:6px;"><span class="ai">🤖 智能体：</span>今日学习总结——<br>
+    ✓ 完成题目：6道（对4道，错2道）<br>
+    ✓ 攻克薄弱项："公式法"从红色→黄色<br>
+    ✓ 新增薄弱项："判别式符号判断"（黄色）<br>
+    ✓ 明天建议：继续第22.2节，重点攻克"判别式"<br>
+    已同步到家长工作台，快去告诉妈妈你今天的进步吧！</div>
+</div>
+
+<h2>4.3 智能体引导规则</h2>
+<table>
+  <thead><tr><th style="width:35%">学生状态</th><th>智能体行为</th></tr></thead>
+  <tbody>
+    <tr><td>首次使用教辅</td><td>自动检测学情档案，推荐最需要开始的章节</td></tr>
+    <tr><td>基础扎实的学生</td><td>跳过已掌握章节，直接进入薄弱项</td></tr>
+    <tr><td>薄弱项集中的学生</td><td>降级到对应章节，先补前置知识再前进</td></tr>
+    <tr><td>连续做对（3题以上）</td><td>提升难度，生成变式题或挑战题</td></tr>
+    <tr><td>连续做错（2题以上）</td><td>切换讲解模式，降低难度阶梯递进</td></tr>
+    <tr><td>做完一个单元</td><td>自动生成单元复习任务</td></tr>
+    <tr><td>整本教辅学完</td><td>生成综合测评，输出掌握率报告</td></tr>
+  </tbody>
+</table>
+
+<h2>4.4 与现有 BingoMate 流程的衔接</h2>
+<table>
+  <thead><tr><th style="width:35%">现有 BingoMate 功能</th><th>智能教辅如何增强</th></tr></thead>
+  <tbody>
+    <tr><td>拍照→识别→分析错题</td><td>识别后，自动从教辅数据包中检索同类题推送</td></tr>
+    <tr><td>生成本周薄弱项汇总</td><td>自动定位教辅中对应的薄弱章节，安排针对性复习</td></tr>
+    <tr><td>生成练习题</td><td>优先从教辅数据包中选题，不足时再AI生成</td></tr>
+    <tr><td>名师讲解</td><td>讲解时引用教辅对应的方法库和解析，学生能同步看教辅</td></tr>
+    <tr><td>生成错题本</td><td>错题自动标注在教辅中的页码和题号，方便回看</td></tr>
+    <tr><td>家长看报告</td><td>报告中增加"教辅进度：完成第X章，掌握率X%"</td></tr>
+  </tbody>
+</table>
+
+<div class="pb"></div>
+<h1>五、教辅转化实施流程</h1>
+
+<div class="flow">
+  <div><span class="step">纸质教辅</span></div>
+  <span class="arrow">↓</span>
+  <div><span class="step">Step 1: 整本批量扫描 → PDF</span></div>
+  <span class="arrow">↓</span>
+  <div><span class="step">Step 2: OCR识别（数学公式识别率高的工具）</span></div>
+  <span class="arrow">↓</span>
+  <div><span class="step">Step 3: AI辅助标注（知识点标签、难度、推荐分层、初版解析）</span></div>
+  <span class="arrow">↓</span>
+  <div><span class="step">Step 4: 人工质检校验（修正识别错误，确认标签）</span></div>
+  <span class="arrow">↓</span>
+  <div><span class="step">Step 5: 结构化入库（图谱/题库/方法库/变式规则/讲解模板）</span></div>
+  <span class="arrow">↓</span>
+  <div><span class="step step-active">智能教辅数据包，可在 BingoMate 中使用</span></div>
+</div>
+
+<div class="pb"></div>
+<h1>六、产品设计原则</h1>
+
+<h2>6.1 核心原则</h2>
+<ol>
+  <li><strong>无缝衔接</strong>：不改变已有 BingoMate 使用习惯，原有拍照、分析、同步流程全部保留</li>
+  <li><strong>渐进增强</strong>：教辅数据包是增量能力——没有数据包时 BingoMate 照常运行，有数据包时自动升级体验</li>
+  <li><strong>数据驱动</strong>：学情数据越丰富，智能体引导越精准；前期数据少时先按默认路径走</li>
+  <li><strong>隐私优先</strong>：所有数据存储在 BingoClaw 设备本地，不上传云端</li>
+</ol>
+
+<h2>6.2 技术架构理念（不涉及具体实现）</h2>
+<ul>
+  <li><strong>大模型</strong>负责"讲解生成"和"逻辑推理"</li>
+  <li><strong>结构化数据库</strong>负责"精准检索"和"内容供给"</li>
+  <li>两者通过检索增强生成（RAG）结合，而不是把所有内容都塞给大模型</li>
+</ul>
+
+<h2>6.3 与 BingoMate 现有功能的关系</h2>
+<table>
+  <thead><tr><th style="width:25%">现有功能</th><th>智能教辅如何利用</th></tr></thead>
+  <tbody>
+    <tr><td>拍照识别</td><td>识别学生作业后，自动匹配教辅数据包中的对应题目</td></tr>
+    <tr><td>错题归档</td><td>错题自动关联到教辅的章节和页码</td></tr>
+    <tr><td>薄弱项判定</td><td>在教辅的知识图谱中定位薄弱知识点</td></tr>
+    <tr><td>名师讲解</td><td>讲解时引用教辅数据包中的方法库和解析</td></tr>
+    <tr><td>学情同步</td><td>家长看到的不只是错题，还有教辅进度和掌握率</td></tr>
+    <tr><td>生成练习题</td><td>优先从教辅数据包中选题，保证与教辅内容一致</td></tr>
+  </tbody>
+</table>
+
+<div class="pb"></div>
+<h1>八、待讨论议题</h1>
+
+<p style="color:#666; font-size:12pt; margin-bottom:20px;">本章列出会上需要明确决策的产品设计问题，各方讨论确认后再写入正式方案。</p>
+
+<!-- ===== 议题一 ===== -->
+<div class="box" style="border-left:6px solid #d97706; background:#fffbeb;">
+  <div class="label" style="color:#d97706; font-size:14pt;">📌 议题一：学生初始水平定位方式</div>
+
+  <p><strong>1) 现有方案的潜在问题</strong></p>
+  <p>当前流程假设学生启动系统时能准确自报水平（"我是中等生""我数学不好"），但实际存在两个明显漏洞：</p>
+  <table>
+    <thead><tr><th style="width:18%">问题</th><th style="width:38%">具体表现</th><th style="width:44%">后果</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>学生自我认知不准确</strong></td>
+        <td>小学生/低年级学生普遍高估或低估自己；部分学生会为了"显得好"或"显得弱"而虚报</td>
+        <td>初始分层判断错位，智能体推送的题目难度全部跑偏</td>
+      </tr>
+      <tr>
+        <td><strong>缺乏统一排名标准</strong></td>
+        <td>目前仅按"优良中差"主观划分，且各地、各校标准不同——A 校的"中等"可能是 B 校的"优秀"</td>
+        <td>无法跨地区、跨学校做横向比对，分层失去客观参照</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p><strong>2) 建议方案：启动时先做一张摸底卷</strong></p>
+  <div class="goal">
+    <div class="big">不靠学生自报，启动系统后先出一张难度适中的各题型综合卷</div>
+    <div class="small">用摸底成绩作为初始分层依据，客观、可比、可复盘</div>
+  </div>
+
+  <p><strong>摸底卷设计要点：</strong></p>
+  <table>
+    <thead><tr><th style="width:30%">维度</th><th style="width:70%">说明</th></tr></thead>
+    <tbody>
+      <tr><td><strong>难度</strong></td><td>中等偏基础（保证大多数学生能做出 60%~80%）</td></tr>
+      <tr><td><strong>题型</strong></td><td>覆盖本学科各题型（选择、填空、计算、应用、阅读理解等）</td></tr>
+      <tr><td><strong>题量</strong></td><td>控制在 20~30 分钟内完成（避免学生产生抵触）</td></tr>
+      <tr><td><strong>评估目标</strong></td><td>测出基础掌握度 + 六维能力初始值 + 知识图谱起始节点</td></tr>
+      <tr><td><strong>结果应用</strong></td><td>直接写入学生档案，作为 A/B/C 分层的客观依据</td></tr>
+    </tbody>
+  </table>
+
+
+<br>
+
+<!-- ===== 议题二 ===== -->
+<div class="box" style="border-left:6px solid #d97706; background:#fffbeb;">
+  <div class="label" style="color:#d97706; font-size:14pt;">📌 议题二：教辅类型的划分与差异化设计</div>
+
+  <p><strong>1) 现状问题</strong></p>
+  <p>目前方案把所有教辅当作"一类资源"统一处理，没有区分其用途。但实际上不同教辅的功能定位差异巨大：</p>
+  <table>
+    <thead><tr><th style="width:22%">类型</th><th style="width:38%">典型场景</th><th style="width:40%">学生使用痛点</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>复习巩固类</strong></td>
+        <td>学期中的同步练习册、单元测试卷、期中期末真题</td>
+        <td>错题反复出现，同样的薄弱点讲完一遍下次还是错</td>
+      </tr>
+      <tr>
+        <td><strong>学习预习类</strong></td>
+        <td>寒暑假预习书、新学期衔接教材、培优讲义</td>
+        <td>新知识点枯燥难懂，自学容易卡壳放弃</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>两类教辅的核心目标和最佳使用节奏完全不同，智能体的引导策略也应当有所区分。</p>
+
+  <p><strong>2) 建议方案：按教辅类型差异化设计引导策略</strong></p>
+  <table>
+    <thead><tr><th style="width:18%">维度</th><th style="width:41%">📘 复习巩固类</th><th style="width:41%">📗 学习预习类</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>核心目标</strong></td>
+        <td>解决孩子已学知识的薄弱点，确保掌握</td>
+        <td>让孩子顺利接触新知识，建立初步认知</td>
+      </tr>
+      <tr>
+        <td><strong>智能体角色</strong></td>
+        <td>"错题医生"——诊断 → 讲解 → 变式巩固</td>
+        <td>"预习导师"——引入 → 启发 → 鼓励探索</td>
+      </tr>
+      <tr>
+        <td><strong>题目难度</strong></td>
+        <td>从薄弱点出发，由易到难逐步攻克</td>
+        <td>从基础概念开始，难度递进慢、引导多</td>
+      </tr>
+      <tr>
+        <td><strong>讲解风格</strong></td>
+        <td>直奔错因、方法导向，少铺垫</td>
+        <td>故事化、生活化类比，多鼓励</td>
+      </tr>
+      <tr>
+        <td><strong>使用节奏</strong></td>
+        <td>按学情动态安排，可跳跃式刷题</td>
+        <td>按章节顺序推进，不建议跳章</td>
+      </tr>
+      <tr>
+        <td><strong>反馈重点</strong></td>
+        <td>薄弱点变化趋势、错题掌握率</td>
+        <td>新知识吸收进度、概念理解度</td>
+      </tr>
+      <tr>
+        <td><strong>家长视角</strong></td>
+        <td>"今天攻克了几个薄弱点"</td>
+        <td>"今天预习到第几章、吸收如何"</td>
+      </tr>
+    </tbody>
+  </table>
+
+<div class="pb"></div>
+<h1>七、附录</h1>
+
+<h2>附录A：学生初始建档模板（继承 BingoMate 现有流程）</h2>
+<div class="dialog">
+  <div><span class="child">👦 孩子：</span>启动 BingoMate</div>
+  <div style="margin-top:6px;"><span class="ai">🤖 智能体：</span>已启动！请告诉我孩子的信息——<br>
+    &nbsp;&nbsp;姓名：小宇<br>
+    &nbsp;&nbsp;年级：初三下期<br>
+    &nbsp;&nbsp;学校：成都七中<br>
+    &nbsp;&nbsp;教材版本：语文人教版/数学北师大版/英语人教版/物理教科版/...<br>
+    &nbsp;&nbsp;薄弱项：数学物理化学<br>
+    &nbsp;&nbsp;性格：内向，希望温柔有趣的风格<br>
+    &nbsp;&nbsp;学习时间：周一至周五每天30分钟，周末每科20分钟</div>
+</div>
+
+<h2>附录B：智能体引导话术库</h2>
+<table>
+  <thead><tr><th style="width:18%">场景</th><th>话术</th></tr></thead>
+  <tbody>
+    <tr><td>开始学习</td><td>"好的！你上次学到第X章，我们从这里开始，还是先攻克薄弱项？"</td></tr>
+    <tr><td>做对题</td><td>"完全正确！🎉 来挑战一道变式题？"</td></tr>
+    <tr><td>做错题</td><td>"没关系，这道题考查的是X知识点，我们换个角度重新讲一遍"</td></tr>
+    <tr><td>走神提示</td><td>"注意力集中哦，做完这道题可以休息5分钟"</td></tr>
+    <tr><td>完成目标</td><td>"太棒了！今天的目标全部完成，比预计快了5分钟！"</td></tr>
+    <tr><td>家长推送</td><td>"今日学习报告已生成，点击查看详情"</td></tr>
+  </tbody>
+</table>
+
+<br>
+<div style="text-align:center; color:#888; font-size:11pt; border-top:1px solid #e5e7eb; padding-top:15px;">
+  本方案由缤果学伴产品团队编制，版本 v3.0（产品视角）。<br>
+  实施过程中将根据实际数据持续迭代优化。
+</div>
+
+</div>
+</body>
+</html>

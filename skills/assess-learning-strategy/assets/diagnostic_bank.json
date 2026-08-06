@@ -1,0 +1,138 @@
+{
+  "version": 1,
+  "description": "Diagnostic metadata for a curated subset of the existing Unit 1 and Unit 2 exercise JSON.",
+  "items": [
+    {
+      "id": "u1-transport-by",
+      "source_file": "resource/1.2单元及json/unit1_questions.json",
+      "unit": "Unit 1",
+      "locator": {"period": "第3课时", "exercise_no": "I", "question_no": 1},
+      "answers": ["B", "by"],
+      "difficulty": 1,
+      "dimension": "语法",
+      "knowledge_point": "交通方式介词 by",
+      "priority": 1
+    },
+    {
+      "id": "u1-repeat-word",
+      "source_file": "resource/1.2单元及json/unit1_questions.json",
+      "unit": "Unit 1",
+      "locator": {"period": "第3课时", "exercise_no": "I", "question_no": 2},
+      "answers": ["A", "repeat"],
+      "difficulty": 1,
+      "dimension": "词汇",
+      "knowledge_point": "学习行为词汇 repeat",
+      "priority": 2
+    },
+    {
+      "id": "u1-method-by",
+      "source_file": "resource/1.2单元及json/unit1_questions.json",
+      "unit": "Unit 1",
+      "locator": {"period": "第3课时", "exercise_no": "I", "question_no": 3},
+      "answers": ["D", "how; by", "how by"],
+      "difficulty": 2,
+      "dimension": "语法",
+      "knowledge_point": "how 提问与 by 表方式",
+      "priority": 3
+    },
+    {
+      "id": "u1-unless",
+      "source_file": "resource/1.2单元及json/unit1_questions.json",
+      "unit": "Unit 1",
+      "locator": {"period": "第5课时", "exercise_no": "III", "question_no": 14},
+      "answers": ["B", "unless"],
+      "difficulty": 3,
+      "dimension": "语境运用",
+      "knowledge_point": "unless 条件状语从句",
+      "priority": 4
+    },
+    {
+      "id": "u1-depends-on",
+      "source_file": "resource/1.2单元及json/unit1_questions.json",
+      "unit": "Unit 1",
+      "locator": {"period": "第5课时", "exercise_no": "III", "question_no": 13},
+      "answers": ["D", "depends on"],
+      "difficulty": 2,
+      "dimension": "词汇",
+      "knowledge_point": "短语 depends on",
+      "priority": 5
+    },
+    {
+      "id": "u1-find-out",
+      "source_file": "resource/1.2单元及json/unit1_questions.json",
+      "unit": "Unit 1",
+      "locator": {"period": "第5课时", "exercise_no": "III", "question_no": 12},
+      "answers": ["A", "find out"],
+      "difficulty": 2,
+      "dimension": "词汇",
+      "knowledge_point": "短语 find out",
+      "priority": 6
+    },
+    {
+      "id": "u2-exclamation",
+      "source_file": "resource/1.2单元及json/unit2_questions.json",
+      "unit": "Unit 2",
+      "locator": {"period": "第3课时", "exercise_no": "I", "question_no": 1},
+      "answers": ["B", "what a"],
+      "difficulty": 1,
+      "dimension": "语法",
+      "knowledge_point": "What a 感叹句",
+      "priority": 1
+    },
+    {
+      "id": "u2-clause-that",
+      "source_file": "resource/1.2单元及json/unit2_questions.json",
+      "unit": "Unit 2",
+      "locator": {"period": "第3课时", "exercise_no": "I", "question_no": 2},
+      "answers": ["A", "that"],
+      "difficulty": 1,
+      "dimension": "语法",
+      "knowledge_point": "that 引导宾语从句",
+      "priority": 2
+    },
+    {
+      "id": "u2-clause-order",
+      "source_file": "resource/1.2单元及json/unit2_questions.json",
+      "unit": "Unit 2",
+      "locator": {"period": "第3课时", "exercise_no": "I", "question_no": 3},
+      "answers": ["B", "whether mike will come to my party"],
+      "difficulty": 2,
+      "dimension": "语法",
+      "knowledge_point": "宾语从句陈述语序",
+      "priority": 3
+    },
+    {
+      "id": "u2-clause-if",
+      "source_file": "resource/1.2单元及json/unit2_questions.json",
+      "unit": "Unit 2",
+      "locator": {"period": "第4课时", "exercise_no": "II", "question_no": 6},
+      "answers": ["B", "if this kind of zongzi is delicious"],
+      "difficulty": 2,
+      "dimension": "语境运用",
+      "knowledge_point": "if 引导宾语从句",
+      "priority": 4
+    },
+    {
+      "id": "u2-during-festival",
+      "source_file": "resource/1.2单元及json/unit2_questions.json",
+      "unit": "Unit 2",
+      "locator": {"period": "第4课时", "exercise_no": "II", "question_no": 5},
+      "answers": ["D", "during"],
+      "difficulty": 1,
+      "dimension": "语境运用",
+      "knowledge_point": "期间介词 during",
+      "priority": 5
+    },
+    {
+      "id": "u2-shot-past",
+      "source_file": "resource/1.2单元及json/unit2_questions.json",
+      "unit": "Unit 2",
+      "locator": {"period": "第2课时", "exercise_no": "II", "question_no": 8},
+      "answers": ["shot"],
+      "difficulty": 1,
+      "dimension": "词汇",
+      "knowledge_point": "不规则动词 shoot 的过去式",
+      "priority": 6
+    }
+  ]
+}

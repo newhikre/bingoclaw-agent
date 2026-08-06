@@ -1,0 +1,4 @@
+interface:
+  display_name: "教辅策略判定"
+  short_description: "基于用户画像和单元诊断题匹配 A/B/C 学习策略"
+  default_prompt: "使用 $assess-learning-strategy 为当前学生建立简要画像，并判断应采用 A、B 或 C 学习策略。"

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python \"提取脚本\\\\mineru_local.py\")"
+    ]
+  }
+}
