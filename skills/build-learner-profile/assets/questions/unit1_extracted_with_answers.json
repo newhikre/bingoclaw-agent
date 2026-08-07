@@ -1,0 +1,1188 @@
+{
+  "metadata": {
+    "source_file": "unit1.pdf",
+    "book": "2026《初中53同步》",
+    "subject": "英语",
+    "grade": "九年级全一册",
+    "version": "人教版",
+    "unit": "Unit 1",
+    "unit_title": "How can we become good learners?",
+    "extracted_at": "2026-08-06"
+  },
+  "sections": [
+    {
+      "period": "第1课时",
+      "section": "Section A (1a—2d)",
+      "exercises": [
+        {
+          "exercise_no": "I",
+          "part": "基础夯实",
+          "type": "用括号内所给词的适当形式填空",
+          "questions": [
+            {
+              "no": 1,
+              "source": "2023四川宜宾中考改编",
+              "stem": "Tina is trying to develop the habit of reading English ______ (loud) every day.",
+              "given_word": "loud"
+            },
+            {
+              "no": 2,
+              "source": null,
+              "stem": "I'm afraid to talk with the foreigners because my ______ (pronounce) is not good.",
+              "given_word": "pronounce"
+            },
+            {
+              "no": 3,
+              "source": null,
+              "stem": "My father is waiting for me ______ (patient). He never gets angry with me.",
+              "given_word": "patient"
+            },
+            {
+              "no": 4,
+              "source": "2024云南中考",
+              "stem": "China's Beidou system has developed ______ (quick) and it plays an important role in many fields.",
+              "given_word": "quick"
+            },
+            {
+              "no": 5,
+              "source": "2023辽宁大连中考",
+              "stem": "The more you go jogging, the ______ (healthy) you will feel. Just try it!",
+              "given_word": "healthy"
+            }
+          ],
+          "answer": {
+            "1": "aloud",
+            "2": "pronunciation",
+            "3": "patiently",
+            "4": "quickly",
+            "5": "healthier"
+          }
+        },
+        {
+          "exercise_no": "II",
+          "part": "基础夯实",
+          "type": "根据汉语意思完成句子，每空一词",
+          "questions": [
+            {
+              "no": 6,
+              "source": "2024四川雅安中考改编",
+              "chinese": "尽量大声说话，让人们听到你。",
+              "stem": "______ ______ speak loud enough to make people hear you."
+            },
+            {
+              "no": 7,
+              "source": null,
+              "chinese": "你可以通过少吃多运动的方式减肥。",
+              "stem": "You can lose weight ______ ______ less and ______ more."
+            },
+            {
+              "no": 8,
+              "source": null,
+              "chinese": "一位好老师应该一直对所有学生都有耐心。",
+              "stem": "A good teacher should always ______ ______ ______ all the students."
+            },
+            {
+              "no": 9,
+              "source": null,
+              "chinese": "一开始，我对这部电影的背景一无所知。",
+              "stem": "______ ______, I knew nothing about the background of this movie."
+            },
+            {
+              "no": 10,
+              "source": null,
+              "chinese": "你不必逐词翻译这篇文章。",
+              "stem": "You don't have to translate this article ______ ______ ______."
+            }
+          ],
+          "answer": {
+            "6": "Try to",
+            "7": "by eating; exercising",
+            "8": "be patient with",
+            "9": "At first",
+            "10": "word by word"
+          }
+        },
+        {
+          "exercise_no": "III",
+          "part": "能力提升",
+          "type": "补全对话",
+          "source": "2025天津河西期中",
+          "theme": "人与自我·学校生活",
+          "instruction": "根据对话内容，选择恰当的句子将对话补充完整。（选项中有两项是多余的）",
+          "dialogue": [
+            {
+              "speaker": "W",
+              "text": "You look worried, David. What's wrong?"
+            },
+            {
+              "speaker": "M",
+              "text": "11. ______"
+            },
+            {
+              "speaker": "W",
+              "text": "You said you liked English. 12. ______"
+            },
+            {
+              "speaker": "M",
+              "text": "I find it difficult to do English reading, especially reading a longer passage."
+            },
+            {
+              "speaker": "W",
+              "text": "That doesn't sound too bad."
+            },
+            {
+              "speaker": "M",
+              "text": "13. ______ What should I do?"
+            },
+            {
+              "speaker": "W",
+              "text": "Just read quickly to get the main idea at first. Don't read word by word. Read word groups."
+            },
+            {
+              "speaker": "M",
+              "text": "14. ______"
+            },
+            {
+              "speaker": "W",
+              "text": "Guess a word's meaning by reading the sentences before and after it. You probably understand more than you think."
+            },
+            {
+              "speaker": "M",
+              "text": "That sounds difficult."
+            },
+            {
+              "speaker": "W",
+              "text": "15. ______ You can improve your English reading by more practice. The more you read, the faster you'll be."
+            },
+            {
+              "speaker": "M",
+              "text": "I'll try. Thank you, Mrs. Black."
+            }
+          ],
+          "options": {
+            "A": "But how do I deal with the words I don't understand?",
+            "B": "I hope I can.",
+            "C": "I'm having trouble learning English.",
+            "D": "I failed my maths test.",
+            "E": "Well, be patient. It takes time.",
+            "F": "What's your problem?",
+            "G": "But I'm a very slow reader."
+          },
+          "blanks": [
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "answer": {
+            "11": "C. I'm having trouble learning English.",
+            "12": "F. What's your problem?",
+            "13": "G. But I'm a very slow reader.",
+            "14": "A. But how do I deal with the words I don't understand?",
+            "15": "E. Well, be patient. It takes time."
+          }
+        }
+      ]
+    },
+    {
+      "period": "第2课时",
+      "section": "Section A (3a—3b)",
+      "exercises": [
+        {
+          "exercise_no": "I",
+          "part": "基础夯实",
+          "type": "从方框中选出合适的词，并用其适当形式填空",
+          "word_box": [
+            "grammar",
+            "discover",
+            "secret",
+            "improve",
+            "hide"
+          ],
+          "questions": [
+            {
+              "no": 1,
+              "source": "2024四川广安中考改编",
+              "stem": "Have scientists ______ any life out there in space yet?"
+            },
+            {
+              "no": 2,
+              "source": null,
+              "stem": "You can ______ yourself behind the door. And then you can give Lisa a surprise."
+            },
+            {
+              "no": 3,
+              "source": null,
+              "stem": "My speaking skills have ______ a lot because I often chat with my foreign teachers."
+            },
+            {
+              "no": 4,
+              "source": null,
+              "stem": "Lily often makes mistakes in English ______. She thinks it's too difficult for her."
+            },
+            {
+              "no": 5,
+              "source": null,
+              "stem": "It's not polite to ask a lady's age because that is one of her ______."
+            }
+          ],
+          "answer": {
+            "1": "discovered",
+            "2": "hide",
+            "3": "improved",
+            "4": "grammar",
+            "5": "secrets"
+          }
+        },
+        {
+          "exercise_no": "II",
+          "part": "基础夯实",
+          "type": "用括号内所给词的适当形式填空",
+          "questions": [
+            {
+              "no": 6,
+              "source": null,
+              "stem": "The ______ (express) on my sister's face shows that she is not happy.",
+              "given_word": "express"
+            },
+            {
+              "no": 7,
+              "source": null,
+              "stem": "Please remember these ______ (use) sentences. You may use them in your writing.",
+              "given_word": "use"
+            },
+            {
+              "no": 8,
+              "source": null,
+              "stem": "If you study in the USA, you will have a better ______ (understand) of American culture.",
+              "given_word": "understand"
+            },
+            {
+              "no": 9,
+              "source": null,
+              "stem": "David didn't go to school yesterday because of ______ (have) a high fever.",
+              "given_word": "have"
+            },
+            {
+              "no": 10,
+              "source": null,
+              "stem": "I can't wait to watch the new movie ______ (call) Captain America: Brave New World.",
+              "given_word": "call"
+            }
+          ],
+          "answer": {
+            "6": "expression",
+            "7": "useful",
+            "8": "understanding",
+            "9": "having",
+            "10": "called"
+          }
+        },
+        {
+          "exercise_no": "III",
+          "part": "基础夯实",
+          "type": "根据汉语意思完成句子，每空一词",
+          "questions": [
+            {
+              "no": 11,
+              "source": "2023湖南岳阳中考改编",
+              "chinese": "老师告诉学生们在词典里查阅生词。",
+              "stem": "The teacher tells students to ______ ______ ______ ______ in a dictionary."
+            },
+            {
+              "no": 12,
+              "source": null,
+              "chinese": "去年我和我父母一起游览了上海。我爱上了那座美丽的城市。",
+              "stem": "Last year I visited Shanghai with my parents. I ______ ______ ______ ______ that beautiful city."
+            },
+            {
+              "no": 13,
+              "source": null,
+              "chinese": "当你说英语的时候，不要害怕犯错。",
+              "stem": "Don't ______ ______ ______ make mistakes when you speak English."
+            },
+            {
+              "no": 14,
+              "source": "2024江苏扬州中考改编",
+              "chinese": "那个女孩非常有创造力，以至于她总能想出新主意。",
+              "stem": "The girl is ______ creative ______ she can always come up with new ideas."
+            },
+            {
+              "no": 15,
+              "source": "2024天津中考改编",
+              "chinese": "老师说得又慢又仔细，以便我们可以更好地理解她。",
+              "stem": "The teacher speaks slowly and carefully ______ ______ we can understand her better."
+            },
+            {
+              "no": 16,
+              "source": null,
+              "chinese": "尽管他没有说什么，但从他的肢体语言我能知道他很担心。",
+              "stem": "______ ______ ______ ______ ______, I could know he was very worried from his body language."
+            }
+          ],
+          "answer": {
+            "11": "look up new words",
+            "12": "fell in love with",
+            "13": "be afraid to",
+            "14": "so; that",
+            "15": "so that",
+            "16": "Although he didn't say anything"
+          }
+        },
+        {
+          "exercise_no": "IV",
+          "part": "能力提升",
+          "type": "阅读理解",
+          "source": "2025陕西西安铁一中期中改编",
+          "theme": "人与自我·学习策略",
+          "passage": "There are three common questions about how to improve our English.\n\nThe first question is about real English. Some students say that they want to learn real English. But they don't know what to do. Watching English films is a good way. When we are tired after studying for a long time, we can watch an English film to relax. While watching it, we can also learn real English at the same time.\n\nThe second question is about speaking. Most students feel too shy to talk with foreigners. \"Where are you from?\" \"What do you think of China?\" These are both good questions to start a conversation. Before we begin, take a deep breath and smile! Smiling always helps.\n\nThe third question is about vocabulary. We want to remember all the new words. The problem is that we write them down but forget them soon. Write eight or ten words on a piece of paper and put it in our bedroom. Try to remember them. Spell the words whenever we see them, and change them every day. There is another way. When you're shopping, count the English words or say the English names for everything you see as much as possible.",
+          "questions": [
+            {
+              "no": 17,
+              "stem": "According to the second paragraph, what can we do to learn real English?",
+              "options": {
+                "A": "Talk to foreign friends.",
+                "B": "Remember all words.",
+                "C": "Watch English films.",
+                "D": "Write down words on paper."
+              }
+            },
+            {
+              "no": 18,
+              "stem": "What can we do before we start a conversation with foreigners?",
+              "options": {
+                "A": "Take a deep breath and smile.",
+                "B": "Look at them.",
+                "C": "Introduce ourselves to them.",
+                "D": "Ask some good questions."
+              }
+            },
+            {
+              "no": 19,
+              "tag": "新中考·文章结构题",
+              "stem": "What's the structure (结构) of the passage?",
+              "options": {
+                "A": "①→②→③④（①在上，②居中，③④并列在下）",
+                "B": "①→②③④（①总起，②③④并列）",
+                "C": "①→②③→④（①在上，②③并列居中，④在下）",
+                "D": "①→②→③→④（顺次串联）"
+              },
+              "note": "选项为结构图示，此处为文字描述"
+            },
+            {
+              "no": 20,
+              "stem": "Which part of a magazine may the passage come from?",
+              "options": {
+                "A": "Learning tips.",
+                "B": "English stories.",
+                "C": "Foreign culture.",
+                "D": "Students' life."
+              }
+            }
+          ],
+          "answer": {
+            "17": "C. Watch English films.",
+            "18": "A. Take a deep breath and smile.",
+            "19": "B. 1 overall, followed by 2, 3 and 4 in parallel.",
+            "20": "A. Learning tips."
+          }
+        },
+        {
+          "exercise_no": "V",
+          "part": "能力提升",
+          "type": "语法填空",
+          "theme": "人与自我·抗挫能力",
+          "instruction": "阅读下面短文，在空白处填入一个适当的单词或用所给词的正确形式填空。",
+          "passage": "English isn't my first language, so it wasn't easy for me to learn it. I was a slow __21__ (learn) when I was little. Before five, I couldn't even speak in full __22__ (sentence). My learning problems were the result __23__ my illness when I was a baby. After I was born, the doctors found that I had a serious disease and I might not live __24__ over a month. Amazingly (惊奇地), I survived (存活). But the medicine __25__ (influence) my early intellectual (智力的) development.\n\nMy mother always encouraged me not to give up when I faced difficulties. I __26__ (discover) that I was interested in English at the age of 13. I developed __27__ good habit of reading English magazines. And I took notes in English while reading. In order to improve my speaking skills, I often told __28__ (I) friends many stories in English. I kept learning, __29__ realized that no matter how hard my situation was, I must be patient. I chose __30__ (move) on to learn English well. After __31__ (study) English for ten years, I successfully passed the TOEFL and decided to work in a __32__ (Europe) company. And now I'm the CEO of a big company.\n\nGive yourself one more chance __33__ (succeed) when you are in trouble. Success has less to do with IQ (智商) but __34__ (much) to do with hard work, faith and persistence (信心和坚持). Have faith and never give up, and your hard work will __35__ (final) pay off.",
+          "blanks": [
+            {
+              "no": 21,
+              "given_word": "learn"
+            },
+            {
+              "no": 22,
+              "given_word": "sentence"
+            },
+            {
+              "no": 23,
+              "given_word": null
+            },
+            {
+              "no": 24,
+              "given_word": null
+            },
+            {
+              "no": 25,
+              "given_word": "influence"
+            },
+            {
+              "no": 26,
+              "given_word": "discover"
+            },
+            {
+              "no": 27,
+              "given_word": null
+            },
+            {
+              "no": 28,
+              "given_word": "I"
+            },
+            {
+              "no": 29,
+              "given_word": null
+            },
+            {
+              "no": 30,
+              "given_word": "move"
+            },
+            {
+              "no": 31,
+              "given_word": "study"
+            },
+            {
+              "no": 32,
+              "given_word": "Europe"
+            },
+            {
+              "no": 33,
+              "given_word": "succeed"
+            },
+            {
+              "no": 34,
+              "given_word": "much"
+            },
+            {
+              "no": 35,
+              "given_word": "final"
+            }
+          ],
+          "answer": {
+            "21": "learner",
+            "22": "sentences",
+            "23": "of",
+            "24": "for",
+            "25": "influenced",
+            "26": "discovered",
+            "27": "a",
+            "28": "my",
+            "29": "and",
+            "30": "to move",
+            "31": "studying",
+            "32": "European",
+            "33": "to succeed",
+            "34": "more",
+            "35": "finally"
+          }
+        }
+      ]
+    },
+    {
+      "period": "第3课时",
+      "section": "Section A (Grammar Focus)",
+      "exercises": [
+        {
+          "exercise_no": "I",
+          "part": "基础夯实",
+          "type": "单项选择",
+          "questions": [
+            {
+              "no": 1,
+              "source": "2024北京中考改编",
+              "stem": "A lot of people in China travel ______ high-speed train every year.",
+              "options": {
+                "A": "with",
+                "B": "by",
+                "C": "in",
+                "D": "on"
+              }
+            },
+            {
+              "no": 2,
+              "source": null,
+              "stem": "I didn't hear his words clearly, so I asked him to ______ them.",
+              "options": {
+                "A": "repeat",
+                "B": "forget",
+                "C": "improve",
+                "D": "correct"
+              }
+            },
+            {
+              "no": 3,
+              "source": "2024吉林中考改编",
+              "stem": "—Can you tell me ______ we can learn English well? —Sure. ______ taking notes and watching English films.",
+              "options": {
+                "A": "what; With",
+                "B": "how; With",
+                "C": "what; By",
+                "D": "how; By"
+              }
+            }
+          ],
+          "answer": {
+            "1": "B. by",
+            "2": "A. repeat",
+            "3": "D. how; By"
+          }
+        },
+        {
+          "exercise_no": "II",
+          "part": "基础夯实",
+          "type": "根据汉语意思完成句子，每空一词",
+          "questions": [
+            {
+              "no": 4,
+              "source": null,
+              "chinese": "他们打算乘公共汽车去动物园。",
+              "stem": "They are going to the zoo ______ ______."
+            },
+            {
+              "no": 5,
+              "source": null,
+              "chinese": "那个导游正在教我们如何用法语点菜。",
+              "stem": "The guide is teaching us how to order food ______ ______."
+            },
+            {
+              "no": 6,
+              "source": null,
+              "chinese": "那个小男孩正在用他的左手写字。",
+              "stem": "The little boy is writing ______ ______ ______ ______."
+            },
+            {
+              "no": 7,
+              "source": null,
+              "chinese": "我的老师建议我通过看英文电视节目学英语。",
+              "stem": "My teacher advised me to learn English ______ ______ ______ ______ ______."
+            }
+          ],
+          "answer": {
+            "4": "by bus",
+            "5": "in French",
+            "6": "with his left hand",
+            "7": "by watching English TV programs"
+          }
+        },
+        {
+          "exercise_no": "III",
+          "part": "能力提升",
+          "type": "任务型阅读",
+          "source": "2025北京通州期中改编",
+          "instruction": "阅读上述俱乐部的介绍，请根据下列人物需求匹配他们最适合的俱乐部，其中一个选项为多余选项。",
+          "materials": {
+            "A": {
+              "title": "The Language Club",
+              "content": "Do you want to pick up a new language or improve your language skills? The language club is perfect for that. The students in the club are interested in languages and cultures. You can have great conversations, and maybe start planning your next trip overseas."
+            },
+            "B": {
+              "title": "The Creative Writing Club",
+              "content": "If you like writing, you should join the creative writing club. It is helpful in improving writing skills. You can also share your opinions about each other's writing. You may publish something in our school magazine."
+            },
+            "C": {
+              "title": "The Book Club",
+              "content": "Book lovers can come and talk about books and writers together in our book club. Discussing well-loved novels or discovering new ones can be super exciting when you share with like-minded people."
+            },
+            "D": {
+              "title": "The Science Club",
+              "content": "If you are into science, joining the science club is a fantastic way to challenge (挑战) yourself. You can come with a project or projects for school assignments (作业)."
+            }
+          },
+          "questions": [
+            {
+              "no": 8,
+              "stem": "Betty: I like writing stories, but it is difficult for me to write a story well. I want to improve my writing skills."
+            },
+            {
+              "no": 9,
+              "stem": "Peter: I want to know more about different languages and cultures. I hope to learn a new language this year."
+            },
+            {
+              "no": 10,
+              "stem": "Helen: I'm interested in science and technology. I like doing projects on science very much. I want to do more projects."
+            }
+          ],
+          "answer": {
+            "8": "B. The Creative Writing Club",
+            "9": "A. The Language Club",
+            "10": "D. The Science Club"
+          }
+        }
+      ]
+    },
+    {
+      "period": "第4课时",
+      "section": "Section B (1a—1e)",
+      "exercises": [
+        {
+          "exercise_no": "I",
+          "part": "基础夯实",
+          "type": "根据句意和首字母提示写出所缺的单词",
+          "questions": [
+            {
+              "no": 1,
+              "stem": "He drove at a s______ of sixty miles per hour."
+            },
+            {
+              "no": 2,
+              "stem": "The population of India has i______ rapidly. Now it has more than 1.4 billion people."
+            },
+            {
+              "no": 3,
+              "stem": "—I don't know how to p______ this word. —Let me tell you. It's /ˈnɒvl/."
+            },
+            {
+              "no": 4,
+              "stem": "I had to finish the job alone because nobody wanted to be my p______."
+            },
+            {
+              "no": 5,
+              "stem": "You should r______ what you have learned in class. It is a good habit of learning."
+            }
+          ],
+          "answer": {
+            "1": "speed",
+            "2": "increased",
+            "3": "pronounce",
+            "4": "partner",
+            "5": "review"
+          }
+        },
+        {
+          "exercise_no": "II",
+          "part": "基础夯实",
+          "type": "根据汉语意思完成句子，每空一词",
+          "questions": [
+            {
+              "no": 6,
+              "chinese": "当你开口说英语的时候，不要害怕犯错。",
+              "stem": "When you open your mouth to speak English, don't be afraid of ______ ______."
+            },
+            {
+              "no": 7,
+              "chinese": "我偶尔和我的朋友们一起去历史博物馆。",
+              "stem": "I go to the history museum with my friends ______ ______ ______ ______."
+            },
+            {
+              "no": 8,
+              "chinese": "你可以加入英语社团，以便有更多的机会练习说英语。",
+              "stem": "You can join the English club so that you will have more chances to ______ ______ English."
+            }
+          ],
+          "answer": {
+            "6": "making mistakes",
+            "7": "from time to time",
+            "8": "practice/practise speaking"
+          }
+        },
+        {
+          "exercise_no": "III",
+          "part": "能力提升",
+          "type": "短文填空",
+          "source": "2024江苏海安一模改编",
+          "tag": "新素材·环卫工自学外语",
+          "instruction": "请认真阅读下面短文，并根据各题所给首字母的提示，写出一个合适的英语单词的完整、正确形式，使短文通顺。",
+          "passage": "If you are a foreign tourist and get lost in Beijing's Sanlitun area, sanitation worker (清洁工) Zhang Jianna may be your helpful g__9__.\n\nZhang is more than 50 years old. She's a migrant worker from Hebei Province. She had worked as a waitress and a salesclerk in Beijing. In 2012, she became a sanitation worker in Sanlitun.\n\nThere are many embassies (大使馆) in the area. One day in 2014, a foreigner walked up to Zhang o__10__ an embassy. He asked her some questions, but she couldn't understand him. The two looked confusedly at each other. After high school, Zhang had forgotten most of her English knowledge. That day, she d__11__ to relearn the language.\n\nZhang began to study English from her children's textbooks. She memorized the words at night and repeated them the next morning. In her free time, she used some apps on her smartphone to learn English. She also practiced English c__12__ with her children.\n\nZhang's efforts have paid off. Now, she can pronounce English words c__13__ and talk fluently (流利地) to English-speaking tourists. She can help them with directions and give information about the city. Zhang is in charge of a sanitation team. They n__14__ to clean more than 100,000 square meters of road. They also clean more than three hundred w__15__ bins near 56 embassies. Zhang has learned the English names of all these embassies as well.\n\n\"English is like a b__16__,\" said Zhang. \"It helps me i__17__ Beijing to the world.\" The hard-working sanitation worker even p__18__ to study a new language in the future. \"I've heard that French is beautiful, and I'd like to learn it!\"",
+          "blanks": [
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18
+          ],
+          "answer": {
+            "9": "guide",
+            "10": "outside",
+            "11": "decided",
+            "12": "conversations",
+            "13": "correctly",
+            "14": "need",
+            "15": "waste",
+            "16": "bridge",
+            "17": "introduce",
+            "18": "plans"
+          }
+        }
+      ]
+    },
+    {
+      "period": "第5课时",
+      "section": "Section B (2a—3b)",
+      "exercises": [
+        {
+          "exercise_no": "I",
+          "part": "基础夯实",
+          "type": "用括号内所给词的适当形式填空",
+          "questions": [
+            {
+              "no": 1,
+              "stem": "If you are interested in something, your brain will be ______ (active) than before.",
+              "given_word": "active"
+            },
+            {
+              "no": 2,
+              "source": "2024湖北武汉中考改编",
+              "stem": "—Dad, I fail again. It's difficult for me to make a sky lantern. —Keep ______ (try)! I'm sure you can.",
+              "given_word": "try"
+            },
+            {
+              "no": 3,
+              "stem": "As a student, you should pay attention to ______ (listen) to your teachers in class.",
+              "given_word": "listen"
+            },
+            {
+              "no": 4,
+              "source": "2024甘肃兰州中考",
+              "stem": "Learning is a lifelong journey. Learn ______ (wise) and learn well.",
+              "given_word": "wise"
+            },
+            {
+              "no": 5,
+              "stem": "This is a ______ (success) movie and we all want to watch it again.",
+              "given_word": "success"
+            }
+          ],
+          "answer": {
+            "1": "more active",
+            "2": "trying",
+            "3": "listening",
+            "4": "wisely",
+            "5": "successful"
+          }
+        },
+        {
+          "exercise_no": "II",
+          "part": "基础夯实",
+          "type": "根据句意和首字母提示写出所缺的单词",
+          "questions": [
+            {
+              "no": 6,
+              "stem": "I want to be a cartoonist and c______ some new cartoon characters."
+            },
+            {
+              "no": 7,
+              "stem": "Mr. Green is a manager and he has the a______ to run the hotel well."
+            },
+            {
+              "no": 8,
+              "stem": "You should study hard, Mandy. Do you know the old saying \"K______ is power.\"?"
+            },
+            {
+              "no": 9,
+              "stem": "The man is a great singer. He seems to be b______ with the talent for singing."
+            },
+            {
+              "no": 10,
+              "stem": "Use your b______ and think it over, Lily. I'm sure you can think up some good ideas."
+            }
+          ],
+          "answer": {
+            "6": "create",
+            "7": "ability",
+            "8": "knowledge",
+            "9": "born",
+            "10": "brain"
+          }
+        },
+        {
+          "exercise_no": "III",
+          "part": "基础夯实",
+          "type": "单项选择",
+          "questions": [
+            {
+              "no": 11,
+              "stem": "The high-speed railway connecting Luzhou ______ Chongqing was completed.",
+              "options": {
+                "A": "with",
+                "B": "for",
+                "C": "between",
+                "D": "among"
+              }
+            },
+            {
+              "no": 12,
+              "stem": "The police promised to ______ the truth within ten days.",
+              "options": {
+                "A": "find out",
+                "B": "take out",
+                "C": "put out",
+                "D": "set out"
+              }
+            },
+            {
+              "no": 13,
+              "source": "2024江苏常州中考",
+              "stem": "—Which school club should I choose? —It ______ what skills you want to develop.",
+              "options": {
+                "A": "takes on",
+                "B": "carries on",
+                "C": "puts on",
+                "D": "depends on"
+              }
+            },
+            {
+              "no": 14,
+              "source": "2024江苏常州中考",
+              "stem": "Practice is very important. You will forget the new words ______ you often use them.",
+              "options": {
+                "A": "when",
+                "B": "unless",
+                "C": "if",
+                "D": "until"
+              }
+            }
+          ],
+          "answer": {
+            "11": "A. with",
+            "12": "A. find out",
+            "13": "D. depends on",
+            "14": "B. unless"
+          }
+        },
+        {
+          "exercise_no": "IV",
+          "part": "能力提升",
+          "type": "阅读理解",
+          "source": "2024浙江台州书生中学期中改编",
+          "theme": "人与社会·语言与文化",
+          "passage": "Learning Chinese is a challenging but good experience as it gives you the opportunity to communicate with more than a billion people.\n\nForeigners think Chinese is a mysterious and difficult language because it is very different from the Roman alphabet (罗马字母表). In fact, Chinese is not much more difficult than any other language. One reason is that Chinese does not have the kind of complex tenses (复杂的时态) like European languages.\n\nAlthough it is certainly not easy for foreigners, in my experience you can learn Chinese fast. You will certainly find differences between the language in textbooks and people's everyday speech. One example of this is the difference between language on the street and written Chinese. It produces new phrases and vocabulary. In real life nowadays, people often use short, less conversational phrases to communicate with each other. China has many provinces (省份) and their ______ are different.\n\nAfter you learn and understand the Beijing dialect, you may find it hard to understand the Shanghai dialect. The language continues developing. So it is still not easy for learners, no matter how well they learn from textbooks.\n\nI hope that one day more Chinese courses will be able to connect with \"real\" spoken Chinese and the way in which Chinese people speak daily. It will help foreign learners bridge the gap between them and native speakers.",
+          "passage_note": "第三段末尾下划线单词为 dialects（词义猜测题考点）",
+          "questions": [
+            {
+              "no": 15,
+              "stem": "What do foreigners think of Chinese?",
+              "options": {
+                "A": "Chinese is mysterious.",
+                "B": "Chinese is difficult.",
+                "C": "Chinese is different.",
+                "D": "All of the above."
+              }
+            },
+            {
+              "no": 16,
+              "tag": "新中考·词义猜测题",
+              "stem": "What does the underlined word \"dialects\" in Paragraph 3 mean?",
+              "options": {
+                "A": "Some special people in one area.",
+                "B": "Some special languages in one area.",
+                "C": "Some special customs in one area.",
+                "D": "Some special provinces in one area."
+              }
+            },
+            {
+              "no": 17,
+              "tag": "新中考·文章主题题",
+              "stem": "In which unit of a textbook can the text be found?",
+              "options": {
+                "A": "Unit 1 Language Learning",
+                "B": "Unit 2 Chinese History",
+                "C": "Unit 3 The Value of Matter",
+                "D": "Unit 4 The World of Science"
+              }
+            }
+          ],
+          "answer": {
+            "15": "D. All of the above.",
+            "16": "B. Some special languages in one area.",
+            "17": "A. Unit 1 Language Learning"
+          }
+        },
+        {
+          "exercise_no": "V",
+          "part": "能力提升",
+          "type": "任务型阅读（选句填空）",
+          "source": "2024山东临沂中考",
+          "theme": "人与自我·学习策略",
+          "instruction": "阅读下面短文，根据短文内容，从下列选项中选出能填入文中空白处的最佳选项。选项中有一项为多余选项。",
+          "passage_title": "How to Develop Good Study Habits",
+          "passage": "Most teenagers need to learn how to develop good study habits. Learning effective (有效的) study methods can make you feel less stressed about school and improve your grades. Here are some useful methods.\n\n☆ Make a plan ahead of time. First, create a calendar. Use a large wall calendar and write all of your tasks and activities on it. Next, create a weekly planner (规划簿). __18__ You should make sure to include time to work on each task a few days before it's due. Then, create a daily list. This to-do list helps you to know what you should do a day and see how much progress you're making.\n\n☆ Consider the study environment. __19__ Maybe you work better alone. Or, maybe you like to work in a group. No matter what place you choose, when it's homework time, that's the environment you should study in.\n\n☆ __20__ It can be very distracting (使人分心的) to have to look for a pencil or a ruler in the middle of studying. Find a place where you can keep all your homework materials so you're ready to go.\n\n☆ Keep a worry notepad (便笺). If you are easily distracted by your own thoughts, a worry notepad is a good tool for you. Instead of trying to deal with all the distracting things, you can write them down on the notepad. __21__\n\nGood study habits don't always come easily. It takes time to develop them.",
+          "options": {
+            "A": "Have all materials on hand.",
+            "B": "What good study habits do you have?",
+            "C": "Make a study plan for each week.",
+            "D": "Do you study better at school or at home?",
+            "E": "When you finish your homework, then you can deal with the things."
+          },
+          "blanks": [
+            18,
+            19,
+            20,
+            21
+          ],
+          "answer": {
+            "18": "C. Make a study plan for each week.",
+            "19": "D. Do you study better at school or at home?",
+            "20": "A. Have all materials on hand.",
+            "21": "E. When you finish your homework, then you can deal with the things."
+          }
+        }
+      ]
+    },
+    {
+      "period": "素养提优",
+      "section": "Unit 1 主题写作专项",
+      "exercises": [
+        {
+          "exercise_no": "一",
+          "part": "写作实例",
+          "type": "书面表达（建议信）",
+          "topic": "学会学习",
+          "stem": "假设你是李华，十一月中旬你的英国笔友Justin要作为交换生来中国学习、生活，他写信向你倾诉关于语言方面的忧虑。请你给他写一封关于如何学好汉语的建议信。",
+          "content_requirements": [
+            "1.写信的原因",
+            "2.具体建议",
+            "3.表达期待"
+          ],
+          "requirements": [
+            "1.词数80—100，开头与结尾已为你写好，不计入总词数",
+            "2.可适当增加细节，以使行文连贯",
+            "3.文中不得出现考生的真实姓名和校名"
+          ],
+          "given_opening": "Dear Justin,\nThank you for your trust and I really understand you.",
+          "given_ending": "Li Hua",
+          "guidance": {
+            "体裁": "应用文（书信）",
+            "时态": "一般现在时和一般将来时",
+            "人称": "以第二人称为主",
+            "必备词句": [
+              "try to do sth. 尽力做某事",
+              "speak Chinese 说中文",
+              "at school 在学校",
+              "learn about 了解",
+              "Chinese culture 中国文化",
+              "be afraid of 害怕",
+              "make mistakes 犯错",
+              "First, the best way to learn a language is to use it. 首先，学习一门语言最好的方法就是使用它。",
+              "The more you practice, the fewer mistakes you will make. 你练习得越多，犯的错误就会越少。"
+            ]
+          },
+          "sample_essay": "Dear Justin,\nThank you for your trust and I really understand you. Your problem is common among language learners. Here are some suggestions for you.\nFirst, the best way to learn a language is to use it. You should try to speak Chinese with your classmates or teachers at school. Second, you can learn more about Chinese culture, which will help you to understand the language better. Third, don't be afraid of making mistakes. It's normal. The more you practice, the fewer mistakes you will make.\nTry the suggestions above, and I believe you will learn Chinese well. I hope you will enjoy your stay here.\nLi Hua",
+          "answer": "Dear Justin,\nThank you for your trust and I really understand you. Your problem is common among language learners. Here are some suggestions for you.\nFirst, the best way to learn a language is to use it. You should try to speak Chinese with your classmates or teachers at school. Second, you can learn more about Chinese culture, which will help you to understand the language better. Third, don't be afraid of making mistakes. It's normal. The more you practice, the fewer mistakes you will make.\nTry the suggestions above, and I believe you will learn Chinese well. I hope you will enjoy your stay here.\nLi Hua"
+        },
+        {
+          "exercise_no": "二",
+          "part": "写作实战",
+          "type": "书面表达（演讲稿）",
+          "stem": "假如你是李华，你所在的学校即将开展学习方法分享交流活动。作为高年级的学长，你将以\"How to Learn English Well\"为主题，为七年级的学弟学妹们做一次演讲。请你用英语写一篇100词左右的演讲稿。",
+          "hint_words": [
+            "experience",
+            "improve",
+            "useful",
+            "important"
+          ],
+          "content_hints": [
+            "1.Why do you give the speech?",
+            "2.How do you learn English well?"
+          ],
+          "given_opening": "Dear new friends,\nWelcome to our middle school.",
+          "given_ending": "I hope everyone can learn English well. Thanks for listening.",
+          "answer": "Dear new friends,\nWelcome to our middle school. English is an important subject for us. I'm Li Hua and I'm good at English. I'm glad to share my experience with you.\nFirst, to improve my listening skills, I often watch English films. Second, I join an English club to improve my speaking skills. Third, I enjoy reading English books, newspapers and so on. Lastly, I have a pen friend from the UK, and we often write letters to each other in English. This helps me improve my writing skills.\nIn a word, if we keep practicing English, we'll learn it well.\nI hope everyone can learn English well. Thanks for listening."
+        }
+      ]
+    },
+    {
+      "period": "素养提优",
+      "section": "Unit 1 听力专项",
+      "exercises": [
+        {
+          "exercise_no": "第一节",
+          "type": "听力选择（短对话）",
+          "instruction": "你将听到五段对话。每段对话后有一个小题，请在每小题所给的A、B、C三个选项中选出一个最佳选项。每段对话读两遍。",
+          "questions": [
+            {
+              "no": 1,
+              "stem": "Which language would the boy like to learn?",
+              "options": {
+                "A": "Chinese.",
+                "B": "French.",
+                "C": "English."
+              }
+            },
+            {
+              "no": 2,
+              "stem": "Who learns English by studying with a group?",
+              "options": {
+                "A": "Frank.",
+                "B": "Cindy.",
+                "C": "Jenny."
+              }
+            },
+            {
+              "no": 3,
+              "stem": "What does the boy think is the best way to learn English?",
+              "options": {
+                "A": "Reading the textbook a lot.",
+                "B": "Joining an English club.",
+                "C": "Keeping English diaries."
+              }
+            },
+            {
+              "no": 4,
+              "stem": "How does Betty learn English?",
+              "options": {
+                "A": "By listening to the radio.",
+                "B": "By reading aloud every day.",
+                "C": "By watching English movies."
+              }
+            },
+            {
+              "no": 5,
+              "stem": "Why is Tom's English hard to understand?",
+              "options": {
+                "A": "Because he comes from India.",
+                "B": "Because he didn't receive much education.",
+                "C": "Because he hasn't learned English long enough."
+              }
+            }
+          ],
+          "answer": {
+            "1": "B. French.",
+            "2": "C. Jenny.",
+            "3": "B. Joining an English club.",
+            "4": "B. By reading aloud every day.",
+            "5": "A. Because he comes from India."
+          }
+        },
+        {
+          "exercise_no": "第二节",
+          "type": "听力选择（长对话）",
+          "instruction": "你将听到两段对话。每段对话后有几个小题，请在每小题所给的A、B、C三个选项中选出一个最佳选项。每段对话读两遍。",
+          "materials": [
+            {
+              "label": "听下面一段对话，回答第6、7题。",
+              "question_nos": [
+                6,
+                7
+              ]
+            },
+            {
+              "label": "听下面一段对话，回答第8至10题。",
+              "question_nos": [
+                8,
+                9,
+                10
+              ]
+            }
+          ],
+          "questions": [
+            {
+              "no": 6,
+              "stem": "What does the girl think of Mr. Wang?",
+              "options": {
+                "A": "Kind.",
+                "B": "Strict.",
+                "C": "Patient."
+              }
+            },
+            {
+              "no": 7,
+              "stem": "How does the girl learn English?",
+              "options": {
+                "A": "By listening to the radio.",
+                "B": "By asking her teacher for help.",
+                "C": "By using mobile apps."
+              }
+            },
+            {
+              "no": 8,
+              "stem": "How many years have the woman learned English?",
+              "options": {
+                "A": "For one year.",
+                "B": "For two years.",
+                "C": "For three years."
+              }
+            },
+            {
+              "no": 9,
+              "stem": "What problem does the woman have in learning English?",
+              "options": {
+                "A": "Pronunciation.",
+                "B": "Grammar.",
+                "C": "Spelling."
+              }
+            },
+            {
+              "no": 10,
+              "stem": "When will the two speakers meet?",
+              "options": {
+                "A": "At 5:30.",
+                "B": "At 6:00.",
+                "C": "At 6:30."
+              }
+            }
+          ],
+          "answer": {
+            "6": "A. Kind.",
+            "7": "C. By using mobile apps.",
+            "8": "C. For three years.",
+            "9": "B. Grammar.",
+            "10": "C. At 6:30."
+          }
+        },
+        {
+          "exercise_no": "第三节",
+          "type": "听力选择（短文）",
+          "instruction": "你将听到一篇短文。短文后有五个小题，请根据短文内容，在每小题所给的A、B、C三个选项中选出一个最佳选项。短文读两遍。",
+          "questions": [
+            {
+              "no": 11,
+              "stem": "Where does Jenny live now?",
+              "options": {
+                "A": "Beijing.",
+                "B": "Nanjing.",
+                "C": "Guangzhou."
+              }
+            },
+            {
+              "no": 12,
+              "stem": "How long has Jenny learned English?",
+              "options": {
+                "A": "For three years.",
+                "B": "For six years.",
+                "C": "For nine years."
+              }
+            },
+            {
+              "no": 13,
+              "stem": "How did Jenny learn English last year?",
+              "options": {
+                "A": "By doing grammar exercises.",
+                "B": "By making word cards.",
+                "C": "By watching English movies."
+              }
+            },
+            {
+              "no": 14,
+              "stem": "How often do the students in the club meet?",
+              "options": {
+                "A": "Once a week.",
+                "B": "Twice a week.",
+                "C": "Three times a week."
+              }
+            },
+            {
+              "no": 15,
+              "stem": "Who did Jenny make friends with last month?",
+              "options": {
+                "A": "An English girl.",
+                "B": "An Australian girl.",
+                "C": "An American girl."
+              }
+            }
+          ],
+          "answer": {
+            "11": "C. Guangzhou.",
+            "12": "C. For nine years.",
+            "13": "A. By doing grammar exercises.",
+            "14": "C. Three times a week.",
+            "15": "B. An Australian girl."
+          }
+        }
+      ]
+    }
+  ]
+}
