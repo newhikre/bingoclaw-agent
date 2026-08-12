@@ -1,0 +1,4 @@
+interface:
+  display_name: "缤果学伴完整学习闭环"
+  short_description: "从首次画像、个性化练习到学习报告的完整智能教辅流程"
+  default_prompt: "使用 $run-bingomate-learning-cycle 面向学生自然完成摸底、个性化练习和学习反馈；静默执行内部流程，不向用户输出脚本、命令、阶段、画像或专业术语。"

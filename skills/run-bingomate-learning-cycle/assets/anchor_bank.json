@@ -1,0 +1,147 @@
+{
+  "version": 3,
+  "description": "教辅锚题池。题干、标准答案、part、type、ability 一律回源解析（assets/questions/），避免与教辅脱节。",
+  "note": "锚题用于校准 LLM 生成题的难度。数量少不要紧，每次诊断抽 2-3 道即可。",
+  "items": [
+    {
+      "id": "u1-transport-by",
+      "source_file": "questions/unit1_extracted_with_answers.json",
+      "unit": "Unit 1",
+      "locator": {
+        "period": "第3课时",
+        "exercise_no": "I",
+        "question_no": 1
+      },
+      "knowledge_point": "交通方式介词 by"
+    },
+    {
+      "id": "u1-repeat-word",
+      "source_file": "questions/unit1_extracted_with_answers.json",
+      "unit": "Unit 1",
+      "locator": {
+        "period": "第3课时",
+        "exercise_no": "I",
+        "question_no": 2
+      },
+      "knowledge_point": "学习行为词汇 repeat"
+    },
+    {
+      "id": "u1-method-by",
+      "source_file": "questions/unit1_extracted_with_answers.json",
+      "unit": "Unit 1",
+      "locator": {
+        "period": "第3课时",
+        "exercise_no": "I",
+        "question_no": 3
+      },
+      "knowledge_point": "how 提问与 by 表方式"
+    },
+    {
+      "id": "u1-unless",
+      "source_file": "questions/unit1_extracted_with_answers.json",
+      "unit": "Unit 1",
+      "locator": {
+        "period": "第5课时",
+        "exercise_no": "III",
+        "question_no": 14
+      },
+      "knowledge_point": "unless 条件状语从句"
+    },
+    {
+      "id": "u1-depends-on",
+      "source_file": "questions/unit1_extracted_with_answers.json",
+      "unit": "Unit 1",
+      "locator": {
+        "period": "第5课时",
+        "exercise_no": "III",
+        "question_no": 13
+      },
+      "knowledge_point": "短语 depends on"
+    },
+    {
+      "id": "u1-find-out",
+      "source_file": "questions/unit1_extracted_with_answers.json",
+      "unit": "Unit 1",
+      "locator": {
+        "period": "第5课时",
+        "exercise_no": "III",
+        "question_no": 12
+      },
+      "knowledge_point": "短语 find out"
+    },
+    {
+      "id": "u2-exclamation",
+      "source_file": "questions/unit2_extracted_with_answers.json",
+      "unit": "Unit 2",
+      "locator": {
+        "period": "第3课时",
+        "exercise_no": "I",
+        "question_no": 1
+      },
+      "knowledge_point": "What a 感叹句"
+    },
+    {
+      "id": "u2-clause-that",
+      "source_file": "questions/unit2_extracted_with_answers.json",
+      "unit": "Unit 2",
+      "locator": {
+        "period": "第3课时",
+        "exercise_no": "I",
+        "question_no": 2
+      },
+      "knowledge_point": "that 引导宾语从句"
+    },
+    {
+      "id": "u2-clause-order",
+      "source_file": "questions/unit2_extracted_with_answers.json",
+      "unit": "Unit 2",
+      "locator": {
+        "period": "第3课时",
+        "exercise_no": "I",
+        "question_no": 3
+      },
+      "knowledge_point": "宾语从句陈述语序"
+    },
+    {
+      "id": "u2-clause-if",
+      "source_file": "questions/unit2_extracted_with_answers.json",
+      "unit": "Unit 2",
+      "locator": {
+        "period": "第4课时",
+        "exercise_no": "II",
+        "question_no": 6
+      },
+      "knowledge_point": "if 引导宾语从句"
+    },
+    {
+      "id": "u2-during-festival",
+      "source_file": "questions/unit2_extracted_with_answers.json",
+      "unit": "Unit 2",
+      "locator": {
+        "period": "第4课时",
+        "exercise_no": "II",
+        "question_no": 5
+      },
+      "knowledge_point": "期间介词 during"
+    },
+    {
+      "id": "u2-shot-past",
+      "source_file": "questions/unit2_extracted_with_answers.json",
+      "unit": "Unit 2",
+      "locator": {
+        "period": "第2课时",
+        "exercise_no": "II",
+        "question_no": 8
+      },
+      "knowledge_point": "不规则动词 shoot 的过去式"
+    }
+  ],
+  "vendored": {
+    "origin": "resource/1.2单元及json/",
+    "snapshot_of": [
+      "unit1_extracted_with_answers.json",
+      "unit2_extracted_with_answers.json"
+    ],
+    "note": "题库已随 skill 内置于 assets/questions/，本 skill 不依赖项目其他目录。若上游教辅题库更新，需重新同步该副本并跑 validate。"
+  }
+}
