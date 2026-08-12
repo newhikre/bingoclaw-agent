@@ -1,0 +1,15 @@
+{"session_id":"bm-demo-01","bank_available":true,
+ "tier":{"level":"C","name":"稳固基础","confidence":"medium"},
+ "session":{"anchor":"by + 动名词","units":["Unit 1"],"estimated_minutes":13},
+ "items":[
+  {"seq":1,"source":"workbook","part":"基础夯实","ability":"汉英转换","knowledge_point":"with 表工具",
+   "locator":{"unit":"Unit 1","period":"第3课时","exercise_no":"II","question_no":6},
+   "acceptable_answers":["with his left hand"]},
+  {"seq":2,"source":"workbook","part":"基础夯实","ability":"语法辨析","knowledge_point":"by + 动名词",
+   "locator":{"unit":"Unit 1","period":"第3课时","exercise_no":"II","question_no":7},
+   "acceptable_answers":["B","B. by watching"]},
+  {"seq":3,"source":"variant","part":"基础夯实","ability":"词形变化","knowledge_point":"by + 动名词",
+   "acceptable_answers":["making"]},
+  {"seq":4,"source":"workbook","part":"能力提升","ability":"篇章理解","knowledge_point":"任务型阅读",
+   "acceptable_answers":{"8":["B"],"9":["A"],"10":["D"]}}],
+ "next_session":{"exclude_qids":["Unit 1/第3课时/II/6"]}}

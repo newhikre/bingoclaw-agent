@@ -1,0 +1,9 @@
+{"session_id":"bm-demo-01","bank_available":true,
+ "tier":{"level":"C","name":"稳固基础","confidence":"medium"},
+ "session":{"anchor":"by + 动名词","units":["Unit 1"],"estimated_minutes":8},
+ "items":[
+  {"seq":1,"source":"generated","part":"基础夯实","ability":"词形变化","knowledge_point":"by + 动名词",
+   "acceptable_answers":["listening"]},
+  {"seq":2,"source":"generated","part":"基础夯实","ability":"语法辨析","knowledge_point":"by + 动名词",
+   "acceptable_answers":["A"]}],
+ "next_session":{"exclude_qids":["gen-u1-by-07","gen-u1-by-08"]}}
