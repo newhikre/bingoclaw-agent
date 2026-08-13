@@ -42,7 +42,7 @@
 1. 无有效画像：`needs_diagnostic`
 2. 有未归一化作答且入口报告问题：`needs_internal_repair`
 3. 有任务包但尚无作答：`awaiting_responses`
-4. 有尚未报告的真实作答：`ready_for_report`；可出报告，也可显式 `--continue-before-report` 追加同次学习的下一轮
+4. 有尚未报告的真实作答：`ready_for_report`。这个值表示“已具备报告条件、正在等待学生选择”，不是自动出报告；固定等待结束、继续或讲解三选一
 5. 其余有画像状态：`ready_for_task`
 
 新诊断若所有作答均为空或不可评分，仍可产出内部临时 B 策略，但 `item_count=0`，状态继续停在 `needs_diagnostic`，不得据此推学习任务。
@@ -97,7 +97,7 @@ python scripts/cycle_engine.py adopt-profile --state state.json --profile profil
 python scripts/cycle_engine.py append-pack --state state.json --pack task-pack.json
 python scripts/cycle_engine.py append-pack --state state.json --pack round2-pack.json --continue-before-report
 python scripts/cycle_engine.py append-log --state state.json --log raw-log.json
-python scripts/cycle_engine.py report --state state.json --out-dir report-out
+python scripts/cycle_engine.py report --state state.json --out-dir report-out --user-ended
 python scripts/cycle_engine.py apply-patch --state state.json --patch report-or-patch.json
 python scripts/cycle_engine.py validate
 ```
@@ -109,3 +109,5 @@ python scripts/cycle_engine.py validate
 ```
 
 这类内容只供智能体修复，不能原样发给学生或家长。
+
+`status` 和成功的 `append-log` 在 `ready_for_report` 时返回 `round_completion_choice`。模型必须据此显示三项自然语言选择。`report` 缺少 `--user-ended` 时会拒绝执行；该标记只可在学生明确选择结束或主动要求学习总结后使用。选择继续时用 `--continue-before-report`；选择讲解不改变阶段，讲完重新显示三项选择。

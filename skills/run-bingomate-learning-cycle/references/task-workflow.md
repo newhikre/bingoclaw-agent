@@ -156,9 +156,15 @@ python scripts/cycle_engine.py append-pack --state state.json --pack task_pack.j
 
 **到这里是一次交付的终点。** 孩子还没做题，没有作答记录就没有报告，不要接着往下编。
 
-## 第五步，讲完之后出报告
+## 第五步，练完先让学生选择
 
-孩子做完了、或者用户说「今天学完了」时才走这一步。完整字段定义、判分口径与话术要求见 `report-format.md`，动手前读它。
+每一轮正式练习作答完成后，先展示 [copy-policy.md](copy-policy.md) 规定的“结束本次学习 / 继续学习 / 还有不明白的题”三项选择。完成一轮不等于结束本次学习，不能由模型自行猜测，也不能自动出报告。
+
+- 学生选结束，或明确说「今天学完了」「先到这里」「生成学习总结」，才进入报告。
+- 学生选继续，运行 `append-pack ... --continue-before-report` 产生下一轮。
+- 学生选讲解，先问题号、讲解后再次显示三项选择；原始作答不倒改，讲后重做另开订正轮次。
+
+完整字段定义、判分口径与话术要求见 `report-format.md`，动手前读它。
 
 ### 输入是任务包 + 授课记录，一次推题一对
 
@@ -177,7 +183,7 @@ python scripts/cycle_engine.py append-log --state state.json --log round1_log.js
 ### 数字由脚本算
 
 ```bash
-python scripts/cycle_engine.py report --state state.json --out-dir report-out
+python scripts/cycle_engine.py report --state state.json --out-dir report-out --user-ended
 ```
 
 统一入口固定读取状态中的所有未报告完整轮次。汇总正确率是这些轮次的计分点合起来算，不是各轮正确率取平均。**以脚本结果为准，不手算正确率、不为了让报告好看凑数**。答案归一化与 `profile_engine` 同口径，孩子多写个句号、大小写不一致都不判错。

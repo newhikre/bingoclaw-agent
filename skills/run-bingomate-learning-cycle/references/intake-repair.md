@@ -91,7 +91,7 @@ python scripts/cycle_engine.py append-pack --state state.json --pack r1_pack.jso
 python scripts/cycle_engine.py append-log --state state.json --log r1_raw.json
 python scripts/cycle_engine.py append-pack --state state.json --pack r2_pack.json --continue-before-report
 python scripts/cycle_engine.py append-log --state state.json --log r2_raw.json
-python scripts/cycle_engine.py report --state state.json --out-dir report-out
+python scripts/cycle_engine.py report --state state.json --out-dir report-out --user-ended
 ```
 
-通常第一轮后直接报告；只有同次学习确实继续时才使用 `--continue-before-report`。`append-pack` 和 `append-log` 必须交替，强制 `item_id` 与阶段校验会阻止跨轮静默覆盖。
+每轮完成后先让学生选择；选择结束才报告，选择继续才使用 `--continue-before-report`，选择讲解则讲完再次询问。`append-pack` 和 `append-log` 必须交替，强制 `item_id` 与阶段校验会阻止跨轮静默覆盖。

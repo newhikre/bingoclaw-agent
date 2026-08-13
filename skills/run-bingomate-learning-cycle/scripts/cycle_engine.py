@@ -170,6 +170,25 @@ def phase_of(state: dict) -> str:
     return "ready_for_task"
 
 
+def round_completion_choice_payload() -> dict:
+    """Internal routing hint: the caller renders this as natural student copy."""
+    return {
+        "required": True,
+        "student_prompt": (
+            "这组练习完成了。接下来你想：\n"
+            "1. 结束本次学习，看看今天的学习总结\n"
+            "2. 继续学习，再练一组\n"
+            "3. 还有没弄明白的题，先讲一讲（告诉我题号）\n"
+            "回复 1、2 或 3 就可以。"
+        ),
+        "choices": [
+            {"code": "1", "intent": "end_learning", "next_action": "report --user-ended"},
+            {"code": "2", "intent": "continue_learning", "next_action": "append-pack --continue-before-report"},
+            {"code": "3", "intent": "explain_questions", "next_action": "explain then show these choices again"},
+        ],
+    }
+
+
 def status_payload(state: dict) -> dict:
     completed = [r for r in state["rounds"] if r.get("normalized_log")]
     pending = [r for r in state["rounds"] if r.get("task_pack") and not r.get("normalized_log")]
@@ -179,9 +198,13 @@ def status_payload(state: dict) -> dict:
         "ready_for_task": ["append-pack", "rediagnose"],
         "awaiting_responses": ["append-log"],
         "needs_internal_repair": ["append-log"],
-        "ready_for_report": ["report", "append-pack --continue-before-report"],
+        "ready_for_report": [
+            "report --user-ended",
+            "append-pack --continue-before-report",
+            "explain then show choices again",
+        ],
     }[phase]
-    return {
+    payload = {
         "ok": True,
         "schema_version": state["schema_version"],
         "session_id": state["session_id"],
@@ -193,6 +216,9 @@ def status_payload(state: dict) -> dict:
         "rounds_pending": len(pending),
         "reports_count": len(state["reports"]),
     }
+    if phase == "ready_for_report":
+        payload["round_completion_choice"] = round_completion_choice_payload()
+    return payload
 
 
 def merge_non_null(target: dict, patch: dict) -> None:
@@ -621,7 +647,8 @@ def handle_append_pack(args: argparse.Namespace) -> dict:
     continue_before_report = bool(getattr(args, "continue_before_report", False))
     if current_phase == "ready_for_report" and not continue_before_report:
         raise ValueError(
-            "已有未报告作答；先生成报告，或确需同次学习继续推题时显式使用 --continue-before-report"
+            "已有一轮真实作答，正在等待学生选择；只有学生明确选择继续学习后，"
+            "才可显式使用 --continue-before-report"
         )
     if current_phase not in ("ready_for_task", "ready_for_report"):
         raise ValueError(f"当前 phase={current_phase}，不能追加新任务包")
@@ -706,16 +733,17 @@ def handle_append_log(args: argparse.Namespace) -> tuple[dict, int]:
     target["normalized_log"] = normalized
     target["completed_at"] = now_iso()
     save_state(path, state)
-    return (
-        {
-            "ok": True,
-            "phase": phase_of(state),
-            "round": target["round"],
-            "responses": len(normalized["responses"]),
-            "repairs": repairs,
-        },
-        0,
-    )
+    next_phase = phase_of(state)
+    payload = {
+        "ok": True,
+        "phase": next_phase,
+        "round": target["round"],
+        "responses": len(normalized["responses"]),
+        "repairs": repairs,
+    }
+    if next_phase == "ready_for_report":
+        payload["round_completion_choice"] = round_completion_choice_payload()
+    return (payload, 0)
 
 
 def handle_apply_patch(args: argparse.Namespace) -> dict:
@@ -749,6 +777,11 @@ def handle_report(args: argparse.Namespace) -> dict:
     state = load_state(state_path)
     if phase_of(state) != "ready_for_report":
         raise ValueError(f"当前 phase={phase_of(state)}，没有可生成报告的新作答")
+    if not getattr(args, "user_ended", False):
+        raise ValueError(
+            "学生尚未明确选择结束本次学习；先展示结束、继续、讲解三项选择。"
+            "只有学生选择结束或主动要求学习总结后，才可使用 --user-ended"
+        )
 
     target_rounds = [
         round_data
@@ -810,6 +843,9 @@ def integration_checks() -> dict:
     skill_root = Path(__file__).resolve().parent.parent
     skill_text = (skill_root / "SKILL.md").read_text(encoding="utf-8")
     copy_policy_text = (skill_root / "references" / "copy-policy.md").read_text(encoding="utf-8")
+    diagnostic_text = (skill_root / "references" / "diagnostic-workflow.md").read_text(encoding="utf-8")
+    scope_digest_text = (skill_root / "assets" / "scope-digest.md").read_text(encoding="utf-8")
+    task_workflow_text = (skill_root / "references" / "task-workflow.md").read_text(encoding="utf-8")
     checks["silent_user_facing_policy"] = all(
         marker in skill_text + "\n" + copy_policy_text
         for marker in (
@@ -817,6 +853,28 @@ def integration_checks() -> dict:
             "内部执行必须静默",
             "报告流程清楚了。现在跑报告命令",
             "这句话是在帮助学生学习，还是在描述系统怎样工作",
+        )
+    )
+    checks["free_reading_topic_policy"] = all(
+        marker in skill_text + "\n" + diagnostic_text + "\n" + scope_digest_text + "\n" + copy_policy_text
+        for marker in (
+            "阅读主题由模型自由构思",
+            "不设主题池",
+            "90–120",
+            "session_id",
+            "不得复述、缩写或轻微改写",
+            "候选主题",
+        )
+    )
+    checks["round_completion_choice_policy"] = all(
+        marker in skill_text + "\n" + copy_policy_text + "\n" + task_workflow_text
+        for marker in (
+            "结束本次学习",
+            "继续学习",
+            "还有没弄明白的题",
+            "回复 1、2 或 3",
+            "不得自动生成报告",
+            "讲解不倒改原始作答",
         )
     )
 
@@ -1197,8 +1255,17 @@ def integration_checks() -> dict:
         second_log_result, second_log_code = handle_append_log(
             argparse.Namespace(state=str(state_path), log=str(log2_path))
         )
+        choice_status = status_payload(load_state(state_path))
+        try:
+            handle_report(
+                argparse.Namespace(state=str(state_path), out_dir=str(out_dir), user_ended=False)
+            )
+        except ValueError as exc:
+            report_without_choice_blocked = "尚未明确选择结束" in str(exc)
+        else:
+            report_without_choice_blocked = False
         report_result = handle_report(
-            argparse.Namespace(state=str(state_path), out_dir=str(out_dir))
+            argparse.Namespace(state=str(state_path), out_dir=str(out_dir), user_ended=True)
         )
         final_state = load_state(state_path)
         student_copy = (out_dir / "student.txt").read_text(encoding="utf-8")
@@ -1216,6 +1283,17 @@ def integration_checks() -> dict:
             and "演示同学" in student_copy
             and "课时" not in student_copy
             and not any(route in student_copy for route in ("拓展挑战", "巩固提升", "稳固基础"))
+        )
+        checks["round_completion_choice_gate"] = (
+            report_without_choice_blocked
+            and log_result.get("round_completion_choice", {}).get("required") is True
+            and second_log_result.get("round_completion_choice", {}).get("required") is True
+            and choice_status.get("round_completion_choice", {}).get("required") is True
+            and [
+                choice.get("code")
+                for choice in choice_status["round_completion_choice"].get("choices", [])
+            ]
+            == ["1", "2", "3"]
         )
 
         anchor = profile_engine.resolve(profile_engine.load_bank()[0])
@@ -1308,6 +1386,11 @@ def build_parser() -> argparse.ArgumentParser:
     report_cmd = sub.add_parser("report", help="生成三类报告并自动回写画像")
     report_cmd.add_argument("--state", required=True)
     report_cmd.add_argument("--out-dir", required=True)
+    report_cmd.add_argument(
+        "--user-ended",
+        action="store_true",
+        help="仅在学生明确选择结束本次学习或主动要求学习总结后使用",
+    )
 
     patch_cmd = sub.add_parser("apply-patch", help="显式合并已有报告补丁")
     patch_cmd.add_argument("--state", required=True)

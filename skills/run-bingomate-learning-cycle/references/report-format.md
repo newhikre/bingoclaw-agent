@@ -15,7 +15,7 @@ python scripts/cycle_engine.py append-pack --state state.json --pack round1_pack
 python scripts/cycle_engine.py append-log --state state.json --log round1_log.json
 python scripts/cycle_engine.py append-pack --state state.json --pack round2_pack.json --continue-before-report
 python scripts/cycle_engine.py append-log --state state.json --log round2_log.json
-python scripts/cycle_engine.py report --state state.json --out-dir report-out
+python scripts/cycle_engine.py report --state state.json --out-dir report-out --user-ended
 ```
 
 ```json
@@ -40,7 +40,9 @@ python scripts/cycle_engine.py report --state state.json --out-dir report-out
 | --- | --- |
 | **只用 `cycle_engine.py` 写，不手改状态** | 旧轮次、入口修复和画像观测都必须原样保留 |
 | 推题先 `append-pack`，做完再 `append-log` | 状态机与 `item_id` 保证同轮配对 |
-| 第二轮前显式 `--continue-before-report` | 避免已有作答被悄悄绕过报告 |
+| 每轮作答后固定等学生三选一 | 不让模型自行猜测是结束、继续还是需要讲解 |
+| 学生选择继续后显式 `--continue-before-report` | 证明下一轮来自学生选择，不是悄悄绕过报告 |
+| 学生选择结束后显式 `--user-ended` | 没有明确收敛动作时禁止自动生成报告和写回画像 |
 | 报告只读已完成且未报告轮次 | 没有真实作答时不会生成报告 |
 
 **报告只认做完的轮次。** 有未完成轮次时状态停在 `awaiting_responses`，先补真实记录或完成内部恢复，不能越级出报告。报告成功后自动回写画像观测，但策略不变。
@@ -124,7 +126,7 @@ python scripts/cycle_engine.py report --state state.json --out-dir report-out
 ## 三、输出：报告 JSON
 
 ```bash
-python scripts/cycle_engine.py report --state state.json --out-dir report-out
+python scripts/cycle_engine.py report --state state.json --out-dir report-out --user-ended
 ```
 
 命令产出 `report.json`、`student.txt`、`parent.txt`、`teacher.txt` 并自动回写画像。异常时输出带 `visibility: internal` 的错误信封并以退出码 2 结束；不得把它当报告或转发给学生。

@@ -72,6 +72,27 @@
 }
 ```
 
+自由主题的生成阅读仍要完整保存题目定义。建议两个计分小题共用一个 `passage_id`，每个小题各有自己的 `qid`、`acceptable_answers`，并可附上仅供内部复现与去重的元数据：
+
+```json
+{
+  "qid": "gen-reading-01-detail",
+  "passage_id": "reading-bm-20260806-0193-01",
+  "unit": "Unit 1",
+  "part": "能力提升",
+  "type": "阅读理解",
+  "ability": "篇章理解",
+  "acceptable_answers": ["B"],
+  "generation_meta": {
+    "variation_seed": "bm-20260806-0193",
+    "topic": "a school garden project",
+    "question_type": "细节理解"
+  }
+}
+```
+
+`generation_meta` 不参与判分，也不展示给学生。它只用于保证同一 `session_id` 复现同一篇、不同会话不复用旧阅读；`topic` 是模型本次自由创作后的记录，不是预设主题池。
+
 兼容性约定：
 
 - 顶层题目定义支持 `questions`（推荐）和 `generated_items`（旧名称）

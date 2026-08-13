@@ -45,8 +45,10 @@ python scripts/intake.py --pack round1_pack.json --log round1_raw_log.json --out
 
 ```bash
 python scripts/cycle_engine.py append-log --state state.json --log round1_raw_log.json
-python scripts/cycle_engine.py report --state state.json --out-dir out
+python scripts/cycle_engine.py report --state state.json --out-dir out --user-ended
 ```
+
+`append-log` 成功后先向学生展示“结束 / 继续 / 讲解”三项选择。只有学生明确结束时才可带 `--user-ended` 运行报告；选择继续或讲解时不得生成报告。
 
 **拿到 `{"ok": false, ...}` 时不要把它当报告往下渲染**，那是错误信封。回到第一步看 `issues`。
 

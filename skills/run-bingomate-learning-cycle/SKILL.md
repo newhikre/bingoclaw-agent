@@ -47,7 +47,7 @@ python scripts/cycle_engine.py status --state state.json
 | `ready_for_task` | 已有画像，无待完成任务 | 按画像生成一轮任务 |
 | `awaiting_responses` | 已发任务，尚无作答记录 | 讲题并记录原始作答与提示 |
 | `needs_internal_repair` | 作答或任务格式需恢复 | 内部修复后重试，不向学生解释 |
-| `ready_for_report` | 至少一轮真实作答已归一化 | 生成报告；确需同次学习再练一轮时显式继续 |
+| `ready_for_report` | 一轮真实作答已归一化，等待学生决定 | 固定展示“结束 / 继续 / 讲解”三项选择，不自动生成报告 |
 
 用户只要求某一阶段时，在该阶段交付后停止。用户要求完整演示时，阶段之间仍要等待真实回答；不得替学生作答后一路跑完。
 
@@ -81,15 +81,17 @@ python scripts/cycle_engine.py adopt-profile --state state.json --profile profil
 
 1. 只强制询问已学单元与可用时长；姓名、偏好等答多少记多少。
 2. 用 2–3 道教辅锚题校准，其余题补齐能力维度。一次发完，不在摸底中提示或报对错。
-3. 生成题同时保存题目定义、标准答案和自定义 `qid`；不得只保存 `qid + response`。
-4. 收齐作答后静默运行，不先向用户说明脚本或判分流程：
+3. 阅读主题由模型自由构思，不设主题池。只约束已学单元的考点、语言难度、90–120 词篇幅和阅读题型；不得复述、缩写或轻微改写教材语篇、Skill 示例或本次其他题目的情境。
+4. 把 `session_id` 当作内部变化种子：同一会话沿用已生成题目，不同会话重新创作；构思和选择过程不对用户解释。
+5. 生成题同时保存题目定义、标准答案和自定义 `qid`；不得只保存 `qid + response`。
+6. 收齐作答后静默运行，不先向用户说明脚本或判分流程：
 
 ```bash
 python scripts/cycle_engine.py diagnose --state state.json --session diagnostic-session.json
 ```
 
-5. 若标准答案不能覆盖生成题的等价表达，按输入契约在内部补 `model_judgment` 后重试。教辅锚题不得被模型覆盖。
-6. 向孩子反馈做对多少、强弱点和下一步安排，不展示 JSON 或技术恢复过程。
+7. 若标准答案不能覆盖生成题的等价表达，按输入契约在内部补 `model_judgment` 后重试。教辅锚题不得被模型覆盖。
+8. 向孩子反馈做对多少、强弱点和下一步安排，不展示 JSON 或技术恢复过程。
 
 ## 阶段二：按画像生成学习任务
 
@@ -141,13 +143,25 @@ python scripts/cycle_engine.py append-log --state state.json --log raw-log.json
 
 该命令会先执行入口修复。返回 `visibility: internal` 或 `phase: needs_internal_repair` 时，在内部补齐任务定义、标准答案或题目对应关系后重试；不要把修复过程发给学生。
 
-通常一轮后直接出报告。若孩子在同一次学习里确实还要做第二轮，先生成新任务包，再显式追加：
+每一轮正式练习作答成功记入状态后，**先停下来让学生选择，不得自动生成报告**。固定展示：
+
+> 这组练习完成了。接下来你想：
+> 1. 结束本次学习，看看今天的学习总结
+> 2. 继续学习，再练一组
+> 3. 还有没弄明白的题，先讲一讲（告诉我题号）
+>
+> 回复 1、2 或 3 就可以。
+
+- 选 1，才进入报告阶段。
+- 选 2，按当前学习重点生成下一轮任务，并显式追加：
 
 ```bash
 python scripts/cycle_engine.py append-pack --state state.json --pack round2-pack.json --continue-before-report
 ```
 
-之后照常 `append-log`，最终报告会汇总所有尚未报告的轮次，同时保留逐轮明细。不要为了展示多轮而虚构第二轮作答。
+- 选 3，先问具体题号并自然讲解，讲完再次展示同样三项选择。讲解不倒改原始作答或 `hints_used`；若要让学生重新作答，作为带 `repeat_for_correction: true` 的新一轮订正记录。
+
+第二轮之后照常 `append-log`，并再次展示三项选择。最终报告汇总所有尚未报告的轮次，同时保留逐轮明细。不要为了展示多轮而虚构作答。摸底题结束不显示这三项，它只适用于画像建立后的正式练习。
 
 ## 阶段四：报告成文与画像更新
 
@@ -158,10 +172,10 @@ python scripts/cycle_engine.py append-pack --state state.json --pack round2-pack
 - [references/intake-repair.md](references/intake-repair.md)
 - [references/report-copy.md](references/report-copy.md)
 
-在内部静默运行；不要发送“现在跑报告命令”“让脚本判分”“生成三份报告”等过渡语：
+仅当学生选择 1，或明确说“结束学习”“今天先到这里”“生成学习总结”时，在内部静默运行。不要发送“现在跑报告命令”“让脚本判分”“生成三份报告”等过渡语：
 
 ```bash
-python scripts/cycle_engine.py report --state state.json --out-dir report-out
+python scripts/cycle_engine.py report --state state.json --out-dir report-out --user-ended
 ```
 
 一次完成：
