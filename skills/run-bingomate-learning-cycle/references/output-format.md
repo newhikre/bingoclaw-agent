@@ -103,7 +103,10 @@
       "acceptable_answers": ["making"],
       "self_check_passed": true,
       "in_scope": true,
-      "hint_ladder": ["空前面是 by，by 后面的动词一律加 -ing"]
+      "hint_ladder": [
+        "先看空格前面的介词 by",
+        "介词后面的动词要使用 -ing 形式"
+      ]
     },
     {
       "seq": 5,
@@ -214,7 +217,7 @@
 
 ### 必填字段
 
-必填项为 `tier.level`、`tier.source`、`tier.rationale`、`session.difficulty_mix`、`session.layout`、`items`（每道题至少包含 `source`、`part`、`ability`、`acceptable_answers`），以及 `branches` 中的「连续做错 2 题」分支。
+必填项为 `tier.level`、`tier.source`、`tier.rationale`、`session.difficulty_mix`、`session.layout`、`items`（每道题至少包含 `source`、`part`、`ability`、`acceptable_answers` 和至少两级 `hint_ladder`），以及 `branches` 中的「连续做错 2 题」分支。
 
 其余字段没有对应内容时留空或省略，不编造。**`locator` 尤其如此**——课时或题号写错会让学生翻到一道完全不相干的题，这是最容易被家长发现也最伤信任的错误。题库里没有的信息（页码就是其中之一）一律不写。
 
@@ -224,7 +227,7 @@
 
 原题的答案来自题库 `exercises[].answer`，按 `question_no` 取，不自己重算。答案串里的斜杠与分号有确定含义（可替换写法、分空填写），展开成 `acceptable_answers` 的规则见 `bank-contract.md` 第二节——**不要只取斜杠左边那个**。变式题的答案来自执行者自己的解算，且 `self_check_passed` 与 `in_scope` 都需要为 `true`。
 
-`hint_ladder` 是提示而非答案，最后一级也不直接给出结果。阶梯的含蓄程度随本层的讲解风格调整：A 层三级、B 层两级、C 层可以只有一级但要拆得很细。
+`hint_ladder` 是提示而非答案，最后一级也不直接给出结果。每题至少两级：第一级指出观察方向，第二级点明关键规则或定位位置；A 层可增加第三级，C 层则把前两级写得更细、更具体。
 
 `role` 用于说明这道题为什么在这里，写不出来的题不进入任务包。
 

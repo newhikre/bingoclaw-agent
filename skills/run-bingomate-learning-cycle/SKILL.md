@@ -46,6 +46,7 @@ python scripts/cycle_engine.py status --state state.json
 | `needs_diagnostic` | 尚无有效画像 | 建档、摸底并运行画像判定 |
 | `ready_for_task` | 已有画像，无待完成任务 | 按画像生成一轮任务 |
 | `awaiting_responses` | 已发任务，尚无作答记录 | 讲题并记录原始作答与提示 |
+| `needs_remediation` | 本轮存在错题，正在提示、重答或讲解确认 | 按脚本返回的下一步继续订正，不展示收尾选择 |
 | `needs_internal_repair` | 作答或任务格式需恢复 | 内部修复后重试，不向学生解释 |
 | `ready_for_report` | 一轮真实作答已归一化，等待学生决定 | 固定展示“结束 / 继续 / 讲解”三项选择，不自动生成报告 |
 
@@ -79,7 +80,7 @@ python scripts/cycle_engine.py adopt-profile --state state.json --profile profil
 
 执行顺序：
 
-1. 只强制询问已学单元与可用时长；姓名、偏好等答多少记多少。
+1. 建档时直接使用 `status.learner_intake.student_prompt`，自然询问称呼、年级、已学单元、可用时长、薄弱项和交互偏好。学生话术不标“必答 / 选答”，也不说“答多少算多少”；信息缺失时只针对影响下一步的内容自然追问。年级只存档，不参与判层。
 2. 用 2–3 道教辅锚题校准，其余题补齐能力维度。一次发完，不在摸底中提示或报对错。
 3. 阅读主题由模型自由构思，不设主题池。只约束已学单元的考点、语言难度、90–120 词篇幅和阅读题型；不得复述、缩写或轻微改写教材语篇、Skill 示例或本次其他题目的情境。
 4. 把 `session_id` 当作内部变化种子：同一会话沿用已生成题目，不同会话重新创作；构思和选择过程不对用户解释。
@@ -108,11 +109,12 @@ python scripts/cycle_engine.py diagnose --state state.json --session diagnostic-
 
 - 直接消费画像里的策略，不重新判层。
 - 只出 `scope.units` 内的内容；题库与锚题表都在本 skill 的 `assets/`。
-- 优先教辅原题，候选不足才生成变式；所有题都带 `item_id` 与 `acceptable_answers`。
+- 优先教辅原题，候选不足才生成变式；题库可用时，教辅原题不得少于一半题位，禁止整组正式练习全部使用生成题；所有题都带 `item_id` 与 `acceptable_answers`。
 - `session.units` 与每题单元必须落在画像 `scope.units`；`part`、`ability`、`source` 以及变式/生成题自检字段都要通过脚本门禁。
 - 默认不重复已用教辅原题；只有明确订正时才写 `repeat_for_correction: true` 和 `repeat_reason`。
 - `confidence=low` 时只降难度配比，不改讲解风格。
 - 每轮只攻一个主锚点，记录题目为什么出现。
+- 每道题至少提供两级有效 `hint_ladder`，让错题可以先给思路再重答。
 - 对学生隐藏答案、内部策略和产品说明。
 
 生成 `task-pack.json` 后静默记入状态，再直接把题发给学生：
@@ -135,17 +137,35 @@ python scripts/cycle_engine.py append-pack --state state.json --pack task-pack.j
 
 不要替学生修拼写、改大小写或补答案。推了新一批题就是新一轮，不能覆盖上一轮。
 
-一轮结束后静默运行：
+收齐本轮首次作答后静默运行：
 
 ```bash
 python scripts/cycle_engine.py append-log --state state.json --log raw-log.json
 ```
 
-该命令会先执行入口修复。返回 `visibility: internal` 或 `phase: needs_internal_repair` 时，在内部补齐任务定义、标准答案或题目对应关系后重试；不要把修复过程发给学生。
+该命令会先执行入口修复和错题检查。返回 `visibility: internal` 或 `phase: needs_internal_repair` 时，在内部补齐任务定义、标准答案或题目对应关系后重试；不要把修复过程发给学生。
 
-每一轮正式练习作答成功记入状态后，**先停下来让学生选择，不得自动生成报告**。固定展示：
+返回 `phase: needs_remediation` 时，不展示“结束 / 继续 / 讲解”选择，直接发送 `practice_guidance.student_prompt`。学生首次提交整组答案时，这段话必须先说明本组答对数、待巩固题号和可验证的表现亮点，再自然过渡到第一道错题；后续重答和处理下一道错题时不重复整组反馈：
 
-> 这组练习完成了。接下来你想：
+1. 第一次答错，展示第一级思路并邀请再答，不公布答案。
+2. 把原答案和新答案依次写进 `attempts`，把 `response` 更新为最新原话，`hints_used` 更新为 `1`，再次运行 `append-log`。
+3. 仍答错时展示第二级思路，再等待一次真实重答；继续保留全部 `attempts`，`hints_used` 更新为 `2`。
+4. 两次提示后仍未答对，按 `explain_and_confirm` 自然讲清考点，再生成一道**更简单、同考点、不同题面**的确认题。确认题先只发题目，不泄露答案；收到真实回答后把题目定义、标准答案和回答写入 `confirmation`，再次运行 `append-log`。
+5. 确认题无论对错都如实保留；脚本随后生成本组答题反馈并进入收尾选择。不得把讲解后的确认题伪装成最初独立答对。
+
+若画像明确要求“直接讲解 / 直接给答案”，跳过两次猜答，直接讲清规则后进入同考点确认题；仍然必须让学生亲自完成确认题。其他风格默认走两级思路与重答。
+
+若学生明确说“不想再做这题”“跳过订正”或要求结束，尊重选择，使用：
+
+```bash
+python scripts/cycle_engine.py append-log --state state.json --log raw-log.json --student-skipped-remediation
+```
+
+不得为了尽快收尾而替学生添加重答、讲解记录或确认题答案。
+
+本轮无错题、错题处理完成，或学生明确跳过订正后，`append-log` 才会完成本轮。此时**先给简短答题反馈，再停下来让学生选择，不得自动生成报告**。直接使用返回的 `round_completion_choice.student_prompt`：反馈只说本组答对多少、表现较稳的能力和需要再看的展示题号，不手算、不提前写成整份学习报告。随后固定展示：
+
+> 接下来你想：
 > 1. 结束本次学习，看看今天的学习总结
 > 2. 继续学习，再练一组
 > 3. 还有没弄明白的题，先讲一讲（告诉我题号）

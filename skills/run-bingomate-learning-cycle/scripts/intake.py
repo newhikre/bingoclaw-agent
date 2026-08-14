@@ -43,6 +43,7 @@ SEQ_KEYS = ("seq", "no", "index", "idx", "question_index", "题号")
 # 单条记录里：能回溯到任务包的定位
 QID_KEYS = ("item_id", "source_qid", "qid", "id", "locator", "location", "定位")
 SECONDS_KEYS = ("seconds", "sec", "duration", "用时")
+ATTEMPT_KEYS = ("attempts", "attempt_history", "tries", "尝试记录")
 
 
 def load(path: Path) -> Any:
@@ -223,6 +224,26 @@ def normalize(pack: dict, raw_log: Any) -> tuple[dict, list[str], list[str]]:
             repairs.append(f"seq {seq} 没有作答内容，按未作答处理（不进正确率分母）")
         else:
             out["response"] = resp
+
+        attempts = first_key(rec, ATTEMPT_KEYS)
+        if attempts is not None:
+            if not isinstance(attempts, list) or not attempts:
+                issues.append(f"seq {seq} 的 attempts 必须是非空数组")
+                continue
+            if has_response(resp) and attempts[-1] != resp:
+                issues.append(f"seq {seq} 的 response 必须与 attempts 最后一项一致")
+                continue
+            out["attempts"] = attempts
+
+        if rec.get("explanation_given") is not None:
+            out["explanation_given"] = rec.get("explanation_given") is True
+        if rec.get("explanation_summary") not in (None, ""):
+            out["explanation_summary"] = str(rec["explanation_summary"])
+        if rec.get("confirmation") is not None:
+            if not isinstance(rec["confirmation"], dict):
+                issues.append(f"seq {seq} 的 confirmation 必须是对象")
+                continue
+            out["confirmation"] = rec["confirmation"]
 
         # ---- hints_used：缺省 0，但缺省会让掌握度虚高，明确记一条
         hints = first_key(rec, HINT_KEYS)

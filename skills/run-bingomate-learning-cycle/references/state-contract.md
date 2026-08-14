@@ -27,10 +27,10 @@
 }
 ```
 
-- `learner` 保存建档时答到的基本信息。除已学单元和可用时长外，其余都可缺省；不得推断或编造。
+- `learner` 保存建档时答到的基本信息，包括称呼、年级、已学单元、可用时长和交互偏好；不得推断或编造。年级只存档，不参与判层。
 - `diagnose` 会用 `learner.learned_units`、`available_minutes`、`feedback_preference` 补齐诊断会话的缺省值；诊断文件显式值优先。
 - `profile` 保存 `profile_engine.evaluate` 的完整结果，不只保存 A/B/C。
-- `rounds` 只追加，不覆盖旧轮次。每轮同时保存任务包、原始作答、归一化作答、入口修复信息和报告归属。
+- `rounds` 只追加，不覆盖旧轮次。每轮同时保存任务包、原始作答、错题订正状态、归一化作答、入口修复信息和报告归属。
 - `reports` 保存报告元数据；完整报告写到命令指定的输出目录。
 - `profile_observations` 保存每次回写的原始补丁与 `observed_at`，用于追溯，不冒充跨会话趋势。
 - `strategy_history` 只在显式 `rediagnose` 成功时保存被替换的旧画像和策略。
@@ -40,10 +40,11 @@
 阶段不是让模型猜的，由 `status` 计算：
 
 1. 无有效画像：`needs_diagnostic`
-2. 有未归一化作答且入口报告问题：`needs_internal_repair`
-3. 有任务包但尚无作答：`awaiting_responses`
-4. 有尚未报告的真实作答：`ready_for_report`。这个值表示“已具备报告条件、正在等待学生选择”，不是自动出报告；固定等待结束、继续或讲解三选一
-5. 其余有画像状态：`ready_for_task`
+2. 有错题等待提示后重答、讲解或确认：`needs_remediation`
+3. 有未归一化作答且入口报告问题：`needs_internal_repair`
+4. 有任务包但尚无作答：`awaiting_responses`
+5. 有尚未报告的真实作答：`ready_for_report`。这个值表示“已具备报告条件、正在等待学生选择”，不是自动出报告；固定等待结束、继续或讲解三选一
+6. 其余有画像状态：`ready_for_task`
 
 新诊断若所有作答均为空或不可评分，仍可产出内部临时 B 策略，但 `item_count=0`，状态继续停在 `needs_diagnostic`，不得据此推学习任务。
 
@@ -97,6 +98,7 @@ python scripts/cycle_engine.py adopt-profile --state state.json --profile profil
 python scripts/cycle_engine.py append-pack --state state.json --pack task-pack.json
 python scripts/cycle_engine.py append-pack --state state.json --pack round2-pack.json --continue-before-report
 python scripts/cycle_engine.py append-log --state state.json --log raw-log.json
+python scripts/cycle_engine.py append-log --state state.json --log raw-log.json --student-skipped-remediation
 python scripts/cycle_engine.py report --state state.json --out-dir report-out --user-ended
 python scripts/cycle_engine.py apply-patch --state state.json --patch report-or-patch.json
 python scripts/cycle_engine.py validate
@@ -110,4 +112,6 @@ python scripts/cycle_engine.py validate
 
 这类内容只供智能体修复，不能原样发给学生或家长。
 
-`status` 和成功的 `append-log` 在 `ready_for_report` 时返回 `round_completion_choice`。模型必须据此显示三项自然语言选择。`report` 缺少 `--user-ended` 时会拒绝执行；该标记只可在学生明确选择结束或主动要求学习总结后使用。选择继续时用 `--continue-before-report`；选择讲解不改变阶段，讲完重新显示三项选择。
+`status` 和 `append-log` 在 `needs_remediation` 时返回 `practice_guidance`。模型只发送其中的学生话术并等待真实重答，不展示收尾选择；只有学生明确拒绝订正时才可使用 `--student-skipped-remediation`。
+
+`status` 和成功的 `append-log` 在 `ready_for_report` 时返回 `round_completion_choice`。模型必须先发送本组答题反馈，再显示三项自然语言选择。`report` 缺少 `--user-ended` 时会拒绝执行；该标记只可在学生明确选择结束或主动要求学习总结后使用。选择继续时用 `--continue-before-report`；选择讲解不改变阶段，讲完重新显示三项选择。

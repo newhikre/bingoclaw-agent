@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import itertools
 import json
 import re
@@ -233,6 +234,8 @@ def grade_item(item: dict, record: dict | None) -> dict:
         "locator": item.get("locator") or item.get("derived_from"),
         "status": status,
         "hints_used": hints,
+        "attempts": copy.deepcopy((record or {}).get("attempts")),
+        "confirmation": copy.deepcopy((record or {}).get("confirmation")),
         "seconds": (record or {}).get("seconds"),
         "points_total": total,
         "points_planned": len(points),

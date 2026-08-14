@@ -157,6 +157,8 @@ def phase_of(state: dict) -> str:
 
     for round_data in reversed(state["rounds"]):
         if round_data.get("task_pack") and not round_data.get("normalized_log"):
+            if (round_data.get("remediation") or {}).get("required") is True:
+                return "needs_remediation"
             intake_state = round_data.get("intake") or {}
             if round_data.get("raw_log") is not None or intake_state.get("issues"):
                 return "needs_internal_repair"
@@ -170,21 +172,288 @@ def phase_of(state: dict) -> str:
     return "ready_for_task"
 
 
-def round_completion_choice_payload() -> dict:
-    """Internal routing hint: the caller renders this as natural student copy."""
+def build_round_feedback(pack: dict, log: dict) -> dict:
+    """Build short, verified student feedback before the end/continue/explain choice."""
+    graded_round = report_engine.build_round(pack, log, 1)
+    graded = graded_round["items"]
+    planned = sum(item["points_planned"] for item in graded)
+    attempted = sum(item["points_total"] for item in graded)
+    correct = sum(item["points_correct"] for item in graded)
+    assisted = sum(item["points_correct"] - item["points_independent"] for item in graded)
+    review_seqs = [
+        str(item["seq"])
+        for item in graded
+        if item["status"] in ("错误", "部分正确", "提示后正确", "未作答")
+    ]
+    confirmations: list[dict] = []
+    for record in log.get("responses", []):
+        confirmation = record.get("confirmation") if isinstance(record, dict) else None
+        if not isinstance(confirmation, dict) or not intake.has_response(confirmation.get("response")):
+            continue
+        confirmations.append(
+            {
+                "seq": record.get("seq"),
+                "correct": report_engine.is_correct(
+                    confirmation.get("response"), confirmation.get("acceptable_answers")
+                ),
+            }
+        )
+
+    ability_labels = {
+        "词形变化": "词形变化",
+        "汉英转换": "中译英",
+        "语法辨析": "语法辨析",
+        "篇章理解": "阅读理解",
+    }
+    steady = [
+        ability_labels.get(ability, ability)
+        for ability, values in graded_round["by_ability"].items()
+        if values.get("points") and values.get("with_hints") == 100.0
+    ][:2]
+
+    if attempted < planned:
+        lead = f"这组计划 {planned} 题，你完成了 {attempted} 题，答对 {correct} 题。"
+    elif correct == planned and assisted == 0:
+        lead = f"这组 {planned} 题全部答对了。"
+    elif correct == planned:
+        lead = f"这组 {planned} 题都答对了，其中 {assisted} 题是在提示后完成的。"
+    else:
+        lead = f"这组 {planned} 题，你答对了 {correct} 题。"
+
+    detail = ""
+    if correct == planned and assisted == 0 and steady:
+        detail = f"{('和'.join(steady))}表现很稳，继续保持。"
+    elif confirmations:
+        passed = [str(row["seq"]) for row in confirmations if row["correct"]]
+        not_yet = [str(row["seq"]) for row in confirmations if not row["correct"]]
+        parts: list[str] = []
+        if passed:
+            parts.append(f"第 {'、'.join(passed)} 题讲解后的确认题已经答对")
+        if not_yet:
+            parts.append(f"第 {'、'.join(not_yet)} 题还需要继续巩固")
+        detail = "；".join(parts) + "。"
+    elif review_seqs:
+        parts: list[str] = []
+        if steady:
+            parts.append(f"{('和'.join(steady))}表现很稳")
+        parts.append(f"第 {'、'.join(review_seqs)} 题还可以再看一看")
+        detail = "；".join(parts) + "。"
+    elif steady:
+        detail = f"{('和'.join(steady))}表现不错。"
+
+    return {
+        "planned": planned,
+        "attempted": attempted,
+        "correct": correct,
+        "assisted": assisted,
+        "review_seqs": review_seqs,
+        "confirmations": confirmations,
+        "student_text": lead + detail,
+    }
+
+
+def attempt_history(record: dict | None) -> list[Any]:
+    if not isinstance(record, dict):
+        return []
+    attempts = record.get("attempts")
+    if isinstance(attempts, list) and attempts:
+        return copy.deepcopy(attempts)
+    response = record.get("response")
+    return [copy.deepcopy(response)] if intake.has_response(response) else []
+
+
+def validate_confirmation(item: dict, record: dict) -> dict | None:
+    confirmation = record.get("confirmation")
+    if confirmation is None:
+        return None
+    if not isinstance(confirmation, dict):
+        raise ValueError(f"seq {item.get('seq')} 的 confirmation 必须是对象")
+    required_text = ("stem", "knowledge_point")
+    if any(not str(confirmation.get(key, "")).strip() for key in required_text):
+        raise ValueError(f"seq {item.get('seq')} 的确认题缺少题干或考点")
+    if confirmation.get("knowledge_point") != item.get("knowledge_point"):
+        raise ValueError(f"seq {item.get('seq')} 的确认题与原题考点不一致")
+    if confirmation.get("stem") == item.get("stem"):
+        raise ValueError(f"seq {item.get('seq')} 的确认题不得照抄原题")
+    if confirmation.get("difficulty_step_down") is not True:
+        raise ValueError(f"seq {item.get('seq')} 的确认题必须明确降低一步难度")
+    if confirmation.get("self_check_passed") is not True or confirmation.get("in_scope") is not True:
+        raise ValueError(f"seq {item.get('seq')} 的确认题必须通过自检与范围检查")
+    answer_spec = confirmation.get("acceptable_answers")
+    if answer_spec in (None, "", [], {}) or not isinstance(answer_spec, (list, dict)):
+        raise ValueError(f"seq {item.get('seq')} 的确认题缺少 acceptable_answers")
+    if not intake.has_response(confirmation.get("response")):
+        raise ValueError(f"seq {item.get('seq')} 的确认题还没有学生作答")
+    if record.get("explanation_given") is not True or not str(
+        record.get("explanation_summary", "")
+    ).strip():
+        raise ValueError(f"seq {item.get('seq')} 尚未记录讲解过程")
+    return {
+        "seq": item.get("seq"),
+        "correct": report_engine.is_correct(confirmation["response"], answer_spec),
+    }
+
+
+def build_practice_guidance(
+    pack: dict, log: dict, *, include_round_feedback: bool = False
+) -> dict | None:
+    """Return the next retry/explanation action, or None when the round may close."""
+    records = {record.get("seq"): record for record in log.get("responses", [])}
+    for item in pack.get("items", []):
+        seq = item.get("seq")
+        record = records.get(seq)
+        graded = report_engine.grade_item(item, record)
+        if graded["status"] not in ("错误", "部分正确"):
+            continue
+        confirmation = validate_confirmation(item, record or {})
+        if confirmation is not None:
+            continue
+
+        attempts = attempt_history(record)
+        hints_used = int((record or {}).get("hints_used", 0) or 0)
+        if hints_used != max(0, len(attempts) - 1):
+            raise ValueError(
+                f"seq {seq} 的 attempts 与 hints_used 不一致；每次提示后重答都要保留原始尝试"
+            )
+        hint_ladder = [
+            str(hint).strip()
+            for hint in (item.get("hint_ladder") or [])
+            if str(hint).strip()
+        ][:2]
+        feedback_style = str(
+            (pack.get("session") or {}).get("feedback_style")
+            or (pack.get("session") or {}).get("teaching_style")
+            or ""
+        )
+        if "直接" in feedback_style or "给答案" in feedback_style:
+            hint_ladder = []
+        if hints_used < len(hint_ladder):
+            next_level = hints_used + 1
+            hint = hint_ladder[hints_used]
+            guidance = {
+                "required": True,
+                "action": "retry_with_hint",
+                "seq": seq,
+                "attempts": attempts,
+                "next_hints_used": next_level,
+                "hint": hint,
+                "student_prompt": f"第 {seq} 题再想一想：{hint}\n根据这个思路，再答一次吧。",
+            }
+            if include_round_feedback:
+                round_feedback = build_round_feedback(pack, log)
+                guidance["round_feedback"] = round_feedback
+                guidance["student_prompt"] = (
+                    f"{round_feedback['student_text']}\n\n"
+                    f"我们先看第 {seq} 题：{hint}\n根据这个思路，再答一次吧。"
+                )
+            return guidance
+        guidance = {
+            "required": True,
+            "action": "explain_and_confirm",
+            "seq": seq,
+            "attempts": attempts,
+            "next_hints_used": hints_used,
+            "student_prompt": (
+                f"第 {seq} 题已经认真试了几次。我们先把关键思路理清，"
+                "再做一道更简单的同类题确认一下。"
+            ),
+            "confirmation_contract": {
+                "required": True,
+                "fields": [
+                    "stem",
+                    "knowledge_point",
+                    "acceptable_answers",
+                    "response",
+                    "difficulty_step_down",
+                    "self_check_passed",
+                    "in_scope",
+                ],
+                "do_not_reveal_answer_before_response": True,
+            },
+        }
+        if include_round_feedback:
+            round_feedback = build_round_feedback(pack, log)
+            guidance["round_feedback"] = round_feedback
+            guidance["student_prompt"] = (
+                f"{round_feedback['student_text']}\n\n"
+                f"我们先看第 {seq} 题。第 {seq} 题已经认真试过了，"
+                "先把关键思路理清，再做一道更简单的同类题确认一下。"
+            )
+        return guidance
+    return None
+
+
+def validate_remediation_progress(previous: dict | None, log: dict, pack: dict) -> None:
+    if not isinstance(previous, dict) or previous.get("required") is not True:
+        return
+    guidance = previous.get("guidance") or {}
+    seq = guidance.get("seq")
+    record = next((row for row in log.get("responses", []) if row.get("seq") == seq), None)
+    if not isinstance(record, dict):
+        raise ValueError(f"需要继续处理第 {seq} 题，但新记录中找不到这道题")
+    old_attempts = guidance.get("attempts") or []
+    new_attempts = attempt_history(record)
+    if new_attempts[: len(old_attempts)] != old_attempts:
+        raise ValueError(f"第 {seq} 题的原始尝试记录不能被覆盖或改写")
+    if guidance.get("action") == "retry_with_hint":
+        if len(new_attempts) != len(old_attempts) + 1:
+            raise ValueError(f"第 {seq} 题收到提示后必须保留原答案并追加一次真实重答")
+        if int(record.get("hints_used", 0) or 0) != guidance.get("next_hints_used"):
+            raise ValueError(f"第 {seq} 题的提示级数没有正确记录")
+    elif guidance.get("action") == "explain_and_confirm":
+        item = next((row for row in pack.get("items", []) if row.get("seq") == seq), None)
+        if item is None:
+            raise ValueError(f"第 {seq} 题缺少原题定义，无法校验确认题")
+        validate_confirmation(item, record)
+
+
+def round_completion_choice_payload(feedback: dict | None = None) -> dict:
+    """Internal routing hint: the caller sends feedback, then the fixed choices."""
+    choice_prompt = (
+        "接下来你想：\n"
+        "1. 结束本次学习，看看今天的学习总结\n"
+        "2. 继续学习，再练一组\n"
+        "3. 还有没弄明白的题，先讲一讲（告诉我题号）\n"
+        "回复 1、2 或 3 就可以。"
+    )
+    student_prompt = choice_prompt
+    if feedback and feedback.get("student_text"):
+        student_prompt = f"{feedback['student_text']}\n\n{choice_prompt}"
     return {
         "required": True,
-        "student_prompt": (
-            "这组练习完成了。接下来你想：\n"
-            "1. 结束本次学习，看看今天的学习总结\n"
-            "2. 继续学习，再练一组\n"
-            "3. 还有没弄明白的题，先讲一讲（告诉我题号）\n"
-            "回复 1、2 或 3 就可以。"
-        ),
+        "feedback": feedback,
+        "student_prompt": student_prompt,
         "choices": [
             {"code": "1", "intent": "end_learning", "next_action": "report --user-ended"},
             {"code": "2", "intent": "continue_learning", "next_action": "append-pack --continue-before-report"},
             {"code": "3", "intent": "explain_questions", "next_action": "explain then show these choices again"},
+        ],
+    }
+
+
+def learner_intake_payload() -> dict:
+    """Stable student-facing intake copy; keep it conversational, not form-like."""
+    student_prompt = (
+        "你好呀！我是缤果学伴，先简单认识一下你：\n\n"
+        "- 怎么称呼你？\n"
+        "- 现在读几年级？\n"
+        "- Unit 1 和 Unit 2 学过哪些？\n"
+        "- 今天大概有多少学习时间？\n"
+        "- 你觉得英语哪一块最费劲？\n"
+        "- 希望我说话温柔一点、有趣一点，还是直接干脆？\n"
+        "- 做错题时，希望我先给思路让你再试，还是直接讲解？\n\n"
+        "按顺序简单回答就可以。"
+    )
+    return {
+        "student_prompt": student_prompt,
+        "fields": [
+            "name",
+            "grade",
+            "learned_units",
+            "available_minutes",
+            "self_reported_weakness",
+            "personality_preference",
+            "feedback_preference",
         ],
     }
 
@@ -197,6 +466,7 @@ def status_payload(state: dict) -> dict:
         "needs_diagnostic": ["diagnose"],
         "ready_for_task": ["append-pack", "rediagnose"],
         "awaiting_responses": ["append-log"],
+        "needs_remediation": ["append-log", "append-log --student-skipped-remediation"],
         "needs_internal_repair": ["append-log"],
         "ready_for_report": [
             "report --user-ended",
@@ -216,8 +486,38 @@ def status_payload(state: dict) -> dict:
         "rounds_pending": len(pending),
         "reports_count": len(state["reports"]),
     }
+    if phase == "needs_diagnostic" and not state.get("learner"):
+        payload["learner_intake"] = learner_intake_payload()
+    if phase == "needs_remediation":
+        active = next(
+            (
+                round_data
+                for round_data in reversed(state["rounds"])
+                if (round_data.get("remediation") or {}).get("required") is True
+            ),
+            None,
+        )
+        if active:
+            payload["practice_guidance"] = (active["remediation"].get("guidance") or {})
     if phase == "ready_for_report":
-        payload["round_completion_choice"] = round_completion_choice_payload()
+        latest_completed = next(
+            (
+                round_data
+                for round_data in reversed(state["rounds"])
+                if round_data.get("task_pack")
+                and round_data.get("normalized_log")
+                and not round_data.get("reported_at")
+            ),
+            None,
+        )
+        feedback = (
+            build_round_feedback(
+                latest_completed["task_pack"], latest_completed["normalized_log"]
+            )
+            if latest_completed
+            else None
+        )
+        payload["round_completion_choice"] = round_completion_choice_payload(feedback)
     return payload
 
 
@@ -496,6 +796,34 @@ def normalize_pack(pack: dict, state: dict, round_no: int) -> dict:
             raise ValueError(f"任务包 seq {seq} 缺少 acceptable_answers")
         if not isinstance(answer_spec, (list, dict)):
             raise ValueError(f"任务包 seq {seq} 的 acceptable_answers 必须是数组或小题对象")
+        hints = item.get("hint_ladder")
+        if (
+            not isinstance(hints, list)
+            or len(hints) < 2
+            or any(not str(hint).strip() for hint in hints[:2])
+        ):
+            raise ValueError(f"任务包 seq {seq} 必须提供至少两级有效 hint_ladder")
+
+    if normalized.get("bank_available") is True:
+        planned_points = sum(
+            len(item["acceptable_answers"])
+            if isinstance(item["acceptable_answers"], dict)
+            else 1
+            for item in items
+        )
+        workbook_points = sum(
+            (
+                len(item["acceptable_answers"])
+                if isinstance(item["acceptable_answers"], dict)
+                else 1
+            )
+            for item in items
+            if item.get("source") == "workbook"
+        )
+        if workbook_points == 0:
+            raise ValueError("教辅题库可用时，正式任务必须包含教辅原题")
+        if workbook_points * 2 < planned_points:
+            raise ValueError("教辅题库可用时，正式任务中教辅原题不得少于一半题位")
 
     normalized["current_used_item_ids"] = current_item_ids
     next_session = normalized.setdefault("next_session", {})
@@ -663,6 +991,7 @@ def handle_append_pack(args: argparse.Namespace) -> dict:
             "raw_log": None,
             "normalized_log": None,
             "intake": {"repairs": [], "issues": []},
+            "remediation": None,
             "reported_at": None,
             "report_id": None,
         }
@@ -695,13 +1024,20 @@ def handle_append_log(args: argparse.Namespace) -> tuple[dict, int]:
     path = Path(args.state)
     state = load_state(path)
     target = pending_round(state)
+    previous_remediation = copy.deepcopy(target.get("remediation"))
+    skip_remediation = bool(getattr(args, "student_skipped_remediation", False))
     raw = load_json(Path(args.log))
-    target["raw_log"] = copy.deepcopy(raw)
     try:
         normalized, repairs, issues = intake.normalize(target["task_pack"], raw)
+        if not issues and not skip_remediation:
+            validate_remediation_progress(
+                previous_remediation, normalized, target["task_pack"]
+            )
     except Exception as exc:
         target["normalized_log"] = None
         target["intake"] = {"repairs": [], "issues": [str(exc)]}
+        if previous_remediation is None:
+            target["raw_log"] = copy.deepcopy(raw)
         save_state(path, state)
         return (
             {
@@ -717,6 +1053,8 @@ def handle_append_log(args: argparse.Namespace) -> tuple[dict, int]:
     if issues:
         target["normalized_log"] = None
         target["intake"]["normalized_candidate"] = normalized
+        if previous_remediation is None:
+            target["raw_log"] = copy.deepcopy(raw)
         save_state(path, state)
         return (
             {
@@ -730,7 +1068,33 @@ def handle_append_log(args: argparse.Namespace) -> tuple[dict, int]:
             2,
         )
 
+    target["raw_log"] = copy.deepcopy(raw)
+    guidance = None if skip_remediation else build_practice_guidance(
+        target["task_pack"],
+        normalized,
+        include_round_feedback=previous_remediation is None,
+    )
+    if guidance is not None:
+        target["normalized_log"] = None
+        target["remediation"] = {
+            "required": True,
+            "guidance": guidance,
+            "normalized_candidate": normalized,
+        }
+        save_state(path, state)
+        return (
+            {
+                "ok": True,
+                "phase": phase_of(state),
+                "round": target["round"],
+                "responses": len(normalized["responses"]),
+                "practice_guidance": guidance,
+            },
+            0,
+        )
+
     target["normalized_log"] = normalized
+    target["remediation"] = None
     target["completed_at"] = now_iso()
     save_state(path, state)
     next_phase = phase_of(state)
@@ -742,7 +1106,8 @@ def handle_append_log(args: argparse.Namespace) -> tuple[dict, int]:
         "repairs": repairs,
     }
     if next_phase == "ready_for_report":
-        payload["round_completion_choice"] = round_completion_choice_payload()
+        feedback = build_round_feedback(target["task_pack"], target["normalized_log"])
+        payload["round_completion_choice"] = round_completion_choice_payload(feedback)
     return (payload, 0)
 
 
@@ -873,8 +1238,39 @@ def integration_checks() -> dict:
             "继续学习",
             "还有没弄明白的题",
             "回复 1、2 或 3",
+            "先给简短答题反馈",
+            "先反馈整组作答情况",
             "不得自动生成报告",
             "讲解不倒改原始作答",
+        )
+    )
+    checks["workbook_first_task_policy"] = all(
+        marker in skill_text + "\n" + task_workflow_text
+        for marker in (
+            "教辅原题不得少于一半题位",
+            "整组正式练习全部使用生成题",
+        )
+    )
+    checks["wrong_answer_remediation_policy"] = all(
+        marker in skill_text + "\n" + copy_policy_text + "\n" + task_workflow_text
+        for marker in (
+            "needs_remediation",
+            "第一级思路",
+            "第二级思路",
+            "更简单的同类确认题",
+            "student-skipped-remediation",
+            "不得把讲解后的确认题伪装成最初独立答对",
+        )
+    )
+    intake_copy = learner_intake_payload()["student_prompt"]
+    checks["learner_intake_copy_policy"] = (
+        "现在读几年级" in intake_copy
+        and "Unit 1 和 Unit 2 学过哪些" in intake_copy
+        and "今天大概有多少学习时间" in intake_copy
+        and all(marker not in intake_copy for marker in ("必答", "选答", "答多少算多少"))
+        and all(
+            marker in skill_text + "\n" + diagnostic_text + "\n" + copy_policy_text
+            for marker in ("年级只存档", "不标“必答 / 选答”", "learner_intake.student_prompt")
         )
     )
 
@@ -882,6 +1278,7 @@ def integration_checks() -> dict:
         new_state(
             {
                 "name": "建档同学",
+                "grade": "九年级",
                 "available_minutes": 15,
                 "feedback_preference": "先给思路",
                 "learned_units": ["Unit 1"],
@@ -894,6 +1291,7 @@ def integration_checks() -> dict:
         and prepared["profile"]["feedback_preference"] == "先给思路"
         and prepared["scope"]["units"] == ["Unit 1"]
         and prepared_learner["name"] == "建档同学"
+        and prepared_learner["grade"] == "九年级"
     )
     explicit_prepared, explicit_learner = prepare_diagnostic_session(
         new_state({"available_minutes": 15}),
@@ -1074,6 +1472,7 @@ def integration_checks() -> dict:
                         "ability": "语法辨析",
                         "knowledge_point": "by + 动名词",
                         "acceptable_answers": ["B"],
+                        "hint_ladder": ["先看空格前的介词", "介词后使用动名词形式"],
                         "self_check_passed": True,
                         "in_scope": True,
                     }
@@ -1120,9 +1519,40 @@ def integration_checks() -> dict:
                         "question_no": 7,
                     },
                     "acceptable_answers": ["B"],
+                    "hint_ladder": ["先判断考查的语法结构", "把选项放回完整句子比较"],
                 }
             ],
         }
+        generated_only_with_bank = load_object(pack_path, "task pack")
+        generated_only_with_bank["bank_available"] = True
+        try:
+            normalize_pack(generated_only_with_bank, load_state(state_path), 1)
+        except ValueError as exc:
+            no_original_blocked = "必须包含教辅原题" in str(exc)
+        else:
+            no_original_blocked = False
+        low_original_share = copy.deepcopy(workbook_pack)
+        for seq in (2, 3):
+            low_original_share["items"].append(
+                {
+                    "seq": seq,
+                    "source": "generated",
+                    "part": "基础夯实",
+                    "ability": "语法辨析",
+                    "unit": "Unit 1",
+                    "acceptable_answers": ["B"],
+                    "hint_ladder": ["先判断考查的语法结构", "把选项放回完整句子比较"],
+                    "self_check_passed": True,
+                    "in_scope": True,
+                }
+            )
+        try:
+            normalize_pack(low_original_share, load_state(state_path), 1)
+        except ValueError as exc:
+            low_share_blocked = "不得少于一半题位" in str(exc)
+        else:
+            low_share_blocked = False
+        checks["workbook_first_task_guard"] = no_original_blocked and low_share_blocked
         try:
             normalize_pack(workbook_pack, source_guard_state, 1)
         except ValueError as exc:
@@ -1160,6 +1590,7 @@ def integration_checks() -> dict:
                         "question_no": 7,
                     },
                     "acceptable_answers": ["B"],
+                    "hint_ladder": ["先找题干关键词", "把答案放回原句检查"],
                     "self_check_passed": True,
                     "in_scope": True,
                 }
@@ -1204,6 +1635,184 @@ def integration_checks() -> dict:
             and unreported_duplicate_blocked
             and variant_duplicate_blocked
             and correction_allowed["items"][0]["repeat_for_correction"] is True
+        )
+
+        remediation_state_path = root / "remediation-state.json"
+        remediation_pack_path = root / "remediation-pack.json"
+        remediation_log_path = root / "remediation-log.json"
+        handle_init(
+            argparse.Namespace(
+                state=str(remediation_state_path), learner=str(learner_path), force=False
+            )
+        )
+        handle_adopt_profile(
+            argparse.Namespace(
+                state=str(remediation_state_path), profile=str(profile_path)
+            )
+        )
+        atomic_write_json(
+            remediation_pack_path,
+            {
+                "bank_available": False,
+                "session": {"anchor": "by + 动名词", "units": ["Unit 1"]},
+                "items": [
+                    {
+                        "seq": 1,
+                        "source": "generated",
+                        "part": "基础夯实",
+                        "ability": "语法辨析",
+                        "knowledge_point": "by + 动名词",
+                        "stem": "I learn English by ______ with a group. (study)",
+                        "acceptable_answers": ["studying"],
+                        "hint_ladder": [
+                            "先看空格前面的介词 by",
+                            "介词后面的动词要使用 -ing 形式",
+                        ],
+                        "self_check_passed": True,
+                        "in_scope": True,
+                    }
+                ],
+            },
+        )
+        handle_append_pack(
+            argparse.Namespace(
+                state=str(remediation_state_path), pack=str(remediation_pack_path)
+            )
+        )
+        remediation_item_id = load_state(remediation_state_path)["rounds"][0]["task_pack"][
+            "items"
+        ][0]["item_id"]
+
+        def submit_remediation(record: dict) -> tuple[dict, int]:
+            atomic_write_json(remediation_log_path, {"responses": [record]})
+            return handle_append_log(
+                argparse.Namespace(
+                    state=str(remediation_state_path),
+                    log=str(remediation_log_path),
+                    student_skipped_remediation=False,
+                )
+            )
+
+        retry1, retry1_code = submit_remediation(
+            {
+                "item_id": remediation_item_id,
+                "response": "study",
+                "hints_used": 0,
+            }
+        )
+        retry2, retry2_code = submit_remediation(
+            {
+                "item_id": remediation_item_id,
+                "response": "study",
+                "attempts": ["study", "study"],
+                "hints_used": 1,
+            }
+        )
+        explain, explain_code = submit_remediation(
+            {
+                "item_id": remediation_item_id,
+                "response": "study",
+                "attempts": ["study", "study", "study"],
+                "hints_used": 2,
+            }
+        )
+        resolved, resolved_code = submit_remediation(
+            {
+                "item_id": remediation_item_id,
+                "response": "study",
+                "attempts": ["study", "study", "study"],
+                "hints_used": 2,
+                "explanation_given": True,
+                "explanation_summary": "说明介词 by 后接动名词",
+                "confirmation": {
+                    "stem": "Mia learns new words by ______ word cards. (make)",
+                    "knowledge_point": "by + 动名词",
+                    "acceptable_answers": ["making"],
+                    "response": "making",
+                    "difficulty_step_down": True,
+                    "self_check_passed": True,
+                    "in_scope": True,
+                },
+            }
+        )
+        remediation_state = load_state(remediation_state_path)
+        resolved_log = remediation_state["rounds"][0]["normalized_log"]
+        checks["wrong_answer_remediation_gate"] = (
+            retry1_code == 0
+            and retry1["phase"] == "needs_remediation"
+            and retry1["practice_guidance"]["action"] == "retry_with_hint"
+            and retry1["practice_guidance"]["next_hints_used"] == 1
+            and retry1["practice_guidance"]["round_feedback"]["correct"] == 0
+            and retry1["practice_guidance"]["student_prompt"].index("答对")
+            < retry1["practice_guidance"]["student_prompt"].index("我们先看第 1 题")
+            and retry2_code == 0
+            and retry2["practice_guidance"]["next_hints_used"] == 2
+            and "round_feedback" not in retry2["practice_guidance"]
+            and explain_code == 0
+            and explain["practice_guidance"]["action"] == "explain_and_confirm"
+            and resolved_code == 0
+            and resolved["phase"] == "ready_for_report"
+            and resolved["round_completion_choice"]["feedback"]["confirmations"][0][
+                "correct"
+            ]
+            is True
+            and resolved_log["responses"][0]["attempts"]
+            == ["study", "study", "study"]
+            and resolved_log["responses"][0]["response"] == "study"
+        )
+
+        skip_state_path = root / "remediation-skip-state.json"
+        handle_init(
+            argparse.Namespace(
+                state=str(skip_state_path), learner=str(learner_path), force=False
+            )
+        )
+        handle_adopt_profile(
+            argparse.Namespace(state=str(skip_state_path), profile=str(profile_path))
+        )
+        handle_append_pack(
+            argparse.Namespace(state=str(skip_state_path), pack=str(remediation_pack_path))
+        )
+        skip_item_id = load_state(skip_state_path)["rounds"][0]["task_pack"]["items"][0][
+            "item_id"
+        ]
+        atomic_write_json(
+            remediation_log_path,
+            {
+                "responses": [
+                    {"item_id": skip_item_id, "response": "study", "hints_used": 0}
+                ]
+            },
+        )
+        skip_first, _ = handle_append_log(
+            argparse.Namespace(
+                state=str(skip_state_path),
+                log=str(remediation_log_path),
+                student_skipped_remediation=False,
+            )
+        )
+        skip_final, skip_code = handle_append_log(
+            argparse.Namespace(
+                state=str(skip_state_path),
+                log=str(remediation_log_path),
+                student_skipped_remediation=True,
+            )
+        )
+        checks["student_can_skip_remediation"] = (
+            skip_first["phase"] == "needs_remediation"
+            and skip_code == 0
+            and skip_final["phase"] == "ready_for_report"
+            and skip_final.get("round_completion_choice", {}).get("required") is True
+        )
+        direct_pack = load_object(remediation_pack_path, "task pack")
+        direct_pack["session"]["feedback_style"] = "直接给答案"
+        direct_guidance = build_practice_guidance(
+            direct_pack,
+            {"responses": [{"seq": 1, "response": "study", "hints_used": 0}]},
+        )
+        checks["direct_feedback_style_respected"] = (
+            direct_guidance is not None
+            and direct_guidance["action"] == "explain_and_confirm"
         )
 
         handle_append_pack(argparse.Namespace(state=str(state_path), pack=str(pack_path)))
@@ -1289,6 +1898,10 @@ def integration_checks() -> dict:
             and log_result.get("round_completion_choice", {}).get("required") is True
             and second_log_result.get("round_completion_choice", {}).get("required") is True
             and choice_status.get("round_completion_choice", {}).get("required") is True
+            and log_result["round_completion_choice"]["feedback"]["correct"] == 1
+            and "答对" in log_result["round_completion_choice"]["student_prompt"]
+            and log_result["round_completion_choice"]["student_prompt"].find("答对")
+            < log_result["round_completion_choice"]["student_prompt"].find("接下来你想")
             and [
                 choice.get("code")
                 for choice in choice_status["round_completion_choice"].get("choices", [])
@@ -1382,6 +1995,11 @@ def build_parser() -> argparse.ArgumentParser:
     log_cmd = sub.add_parser("append-log", help="归一化并回填一轮真实作答")
     log_cmd.add_argument("--state", required=True)
     log_cmd.add_argument("--log", required=True)
+    log_cmd.add_argument(
+        "--student-skipped-remediation",
+        action="store_true",
+        help="仅当学生明确拒绝继续订正或要求结束时使用",
+    )
 
     report_cmd = sub.add_parser("report", help="生成三类报告并自动回写画像")
     report_cmd.add_argument("--state", required=True)

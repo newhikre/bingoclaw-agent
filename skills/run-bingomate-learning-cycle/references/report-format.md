@@ -45,7 +45,7 @@ python scripts/cycle_engine.py report --state state.json --out-dir report-out --
 | 学生选择结束后显式 `--user-ended` | 没有明确收敛动作时禁止自动生成报告和写回画像 |
 | 报告只读已完成且未报告轮次 | 没有真实作答时不会生成报告 |
 
-**报告只认做完的轮次。** 有未完成轮次时状态停在 `awaiting_responses`，先补真实记录或完成内部恢复，不能越级出报告。报告成功后自动回写画像观测，但策略不变。
+**报告只认做完的轮次。** 尚未作答时状态停在 `awaiting_responses`，有错题待订正时停在 `needs_remediation`；先补真实记录、完成有限订正或由学生明确跳过，不能越级出报告。报告成功后自动回写画像观测，但策略不变。
 
 ## 一、输入：任务包 + 授课记录，一次推题一对
 
@@ -71,6 +71,7 @@ python scripts/cycle_engine.py report --state state.json --out-dir report-out --
       "item_id": "bm-20260806-0193-r1-i2",
       "seq": 2,
       "response": "by watch English TV programs",
+      "attempts": ["by watch English TV programs", "by watching English TV program"],
       "hints_used": 1,
       "seconds": 90
     },
@@ -91,6 +92,7 @@ python scripts/cycle_engine.py report --state state.json --out-dir report-out --
 | `responses[].item_id`    | str                  | 是         | 对应任务包会话内唯一 `items[].item_id`，是跨阶段主键                                         |
 | `responses[].seq`        | int                  | 兼容字段   | 展示序号；`intake.py` 会与 `item_id` 交叉校验                                                  |
 | `responses[].response`   | str \| {小题号: str} | 是         | 学生原话，**原样记录，不要替他改拼写、补大小写**——判分脚本自己会归一化，替他改过就看不出粗心 |
+| `responses[].attempts`   | array                | 错题重答时 | 从最初答案开始按时间保留全部真实尝试；最后一项必须等于 `response`                         |
 | `responses[].hints_used` | int                  | 否，缺省 0 | 用掉几级提示。这一条决定这道题算不算独立掌握                                                 |
 | `responses[].seconds`    | int                  | 否         | 作答秒数，只进报告不进判定                                                                   |
 | `minutes_actual`         | int                  | 否         | 实际用时，与 `session.estimated_minutes` 对照                                                |
@@ -102,6 +104,26 @@ python scripts/cycle_engine.py report --state state.json --out-dir report-out --
 **`seq` 只在自己那一轮里唯一**，第 2 轮的 `seq: 1` 是另一道题；`item_id` 在整个会话中唯一。同一份记录里的重复 `seq` 或 `item_id` 会直接报错，不再静默覆盖。重做同一道题应作为新一轮任务。
 
 篇章材料的 `response` 是**按小题号的对象**，键要与任务包 `acceptable_answers` 的键对上；只答了一半就只写答了的那部分。未提交的小题不进入正确率分母，报告仍保留其“未作答”明细。
+
+两级提示后仍未答对时，在原题记录中追加：
+
+```json
+{
+  "explanation_given": true,
+  "explanation_summary": "说明 by 是介词，后接动名词，并用题干动词定位",
+  "confirmation": {
+    "stem": "Lucy improves her listening by ______ English songs. (listen)",
+    "knowledge_point": "介词 by 后的动词用 -ing 形式",
+    "acceptable_answers": ["listening to"],
+    "response": "listening to",
+    "difficulty_step_down": true,
+    "self_check_passed": true,
+    "in_scope": true
+  }
+}
+```
+
+确认题必须同考点、更简单、题面不同，先出题再等学生真实回答。`response`、`attempts` 与 `confirmation.response` 都不得由模型代填。确认题的结果会进入即时反馈，但不会把最初错题改成独立正确。
 
 ---
 
