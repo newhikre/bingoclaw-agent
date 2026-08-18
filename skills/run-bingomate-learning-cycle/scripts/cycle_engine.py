@@ -87,6 +87,16 @@ def new_session_id() -> str:
     return f"bm-{datetime.now():%Y%m%d-%H%M%S}-{uuid.uuid4().hex[:6]}"
 
 
+def default_identity_confirmation() -> dict:
+    return {
+        "required": False,
+        "confirmed": False,
+        "learner_name": None,
+        "requested_at": None,
+        "confirmed_at": None,
+    }
+
+
 def new_state(learner: dict | None = None) -> dict:
     created = now_iso()
     return {
@@ -101,6 +111,7 @@ def new_state(learner: dict | None = None) -> dict:
         "latest_report": None,
         "profile_observations": [],
         "strategy_history": [],
+        "identity_confirmation": default_identity_confirmation(),
     }
 
 
@@ -111,6 +122,12 @@ def validate_state_shape(state: dict) -> None:
         )
     if not isinstance(state.get("learner"), dict):
         raise ValueError("state.learner 必须是对象")
+    identity = state.get("identity_confirmation")
+    if not isinstance(identity, dict):
+        raise ValueError("state.identity_confirmation 必须是对象")
+    for key in ("required", "confirmed"):
+        if not isinstance(identity.get(key), bool):
+            raise ValueError(f"state.identity_confirmation.{key} 必须是布尔值")
     for key in ("rounds", "reports", "profile_observations", "strategy_history"):
         if not isinstance(state.get(key), list):
             raise ValueError(f"state.{key} 必须是数组")
@@ -126,6 +143,7 @@ def load_state(path: Path) -> dict:
         raise ValueError(f"状态文件不存在：{path}；先运行 init")
     state = load_object(path, "状态文件")
     state.setdefault("strategy_history", [])
+    state.setdefault("identity_confirmation", default_identity_confirmation())
     validate_state_shape(state)
     return state
 
@@ -152,6 +170,9 @@ def profile_is_ready(profile: Any) -> bool:
 
 
 def phase_of(state: dict) -> str:
+    identity = state.get("identity_confirmation") or {}
+    if identity.get("required") is True and identity.get("confirmed") is not True:
+        return "needs_identity_confirmation"
     if not profile_is_ready(state.get("profile")):
         return "needs_diagnostic"
 
@@ -170,6 +191,11 @@ def phase_of(state: dict) -> str:
     ):
         return "ready_for_report"
     return "ready_for_task"
+
+
+def require_confirmed_identity(state: dict) -> None:
+    if phase_of(state) == "needs_identity_confirmation":
+        raise ValueError("当前 phase=needs_identity_confirmation，必须先确认是否沿用已有档案")
 
 
 def build_round_feedback(pack: dict, log: dict) -> dict:
@@ -431,6 +457,18 @@ def round_completion_choice_payload(feedback: dict | None = None) -> dict:
     }
 
 
+def answer_submission_prompt() -> str:
+    """Fixed student copy after questions; never synthesize answer examples."""
+    return "请按题目显示的编号依次作答，全部完成后一次发给我即可。"
+
+
+def identity_confirmation_prompt(name: Any) -> str:
+    learner_name = str(name or "").strip()
+    if learner_name:
+        return f"请问你是{learner_name}吗？"
+    return "请问这是你的学习档案吗？"
+
+
 def learner_intake_payload() -> dict:
     """Stable student-facing intake copy; keep it conversational, not form-like."""
     student_prompt = (
@@ -463,6 +501,7 @@ def status_payload(state: dict) -> dict:
     pending = [r for r in state["rounds"] if r.get("task_pack") and not r.get("normalized_log")]
     phase = phase_of(state)
     actions = {
+        "needs_identity_confirmation": ["confirm-identity --answer yes|no"],
         "needs_diagnostic": ["diagnose"],
         "ready_for_task": ["append-pack", "rediagnose"],
         "awaiting_responses": ["append-log"],
@@ -488,6 +527,16 @@ def status_payload(state: dict) -> dict:
     }
     if phase == "needs_diagnostic" and not state.get("learner"):
         payload["learner_intake"] = learner_intake_payload()
+    if phase == "needs_identity_confirmation":
+        identity = state.get("identity_confirmation") or {}
+        learner_name = identity.get("learner_name") or (state.get("learner") or {}).get("name")
+        payload["identity_confirmation"] = {
+            "required": True,
+            "learner_name": learner_name,
+            "student_prompt": identity_confirmation_prompt(learner_name),
+        }
+    if phase == "awaiting_responses":
+        payload["answer_submission_prompt"] = answer_submission_prompt()
     if phase == "needs_remediation":
         active = next(
             (
@@ -848,6 +897,60 @@ def handle_init(args: argparse.Namespace) -> dict:
     return {**status_payload(state), "state": str(path)}
 
 
+def handle_activate(args: argparse.Namespace) -> dict:
+    """Start a new user-facing trigger and require identity confirmation when reusable."""
+    path = Path(args.state)
+    if not path.exists():
+        state = new_state()
+        save_state(path, state)
+        return {**status_payload(state), "state": str(path), "created": True}
+
+    state = load_state(path)
+    if profile_is_ready(state.get("profile")):
+        learner_name = str((state.get("learner") or {}).get("name") or "").strip() or None
+        state["identity_confirmation"] = {
+            "required": True,
+            "confirmed": False,
+            "learner_name": learner_name,
+            "requested_at": now_iso(),
+            "confirmed_at": None,
+        }
+        save_state(path, state)
+    return {**status_payload(state), "state": str(path), "created": False}
+
+
+def handle_confirm_identity(args: argparse.Namespace) -> dict:
+    path = Path(args.state)
+    state = load_state(path)
+    if phase_of(state) != "needs_identity_confirmation":
+        raise ValueError("当前没有等待确认的学习档案；请先运行 activate")
+    if args.answer not in ("yes", "no"):
+        raise ValueError("身份确认 answer 只允许 yes 或 no")
+
+    if args.answer == "yes":
+        identity = state["identity_confirmation"]
+        identity["required"] = False
+        identity["confirmed"] = True
+        identity["confirmed_at"] = now_iso()
+        save_state(path, state)
+        return {
+            **status_payload(state),
+            "state": str(path),
+            "identity_confirmed": True,
+        }
+
+    fresh_state = new_state()
+    fresh_path = path.with_name(f"{path.stem}-{fresh_state['session_id']}{path.suffix or '.json'}")
+    save_state(fresh_path, fresh_state)
+    return {
+        **status_payload(fresh_state),
+        "state": str(fresh_path),
+        "previous_state": str(path),
+        "identity_confirmed": False,
+        "created": True,
+    }
+
+
 def handle_status(args: argparse.Namespace) -> dict:
     return status_payload(load_state(Path(args.state)))
 
@@ -912,6 +1015,7 @@ def prepare_diagnostic_session(state: dict, raw_session: dict) -> tuple[dict, di
 def handle_diagnose(args: argparse.Namespace) -> dict:
     path = Path(args.state)
     state = load_state(path)
+    require_confirmed_identity(state)
     if state["rounds"]:
         raise ValueError("已有学习轮次，不能在同一状态中覆盖诊断画像")
     session, combined_learner = prepare_diagnostic_session(
@@ -1003,6 +1107,7 @@ def handle_append_pack(args: argparse.Namespace) -> dict:
         "round": round_no,
         "items": len(normalized["items"]),
         "item_ids": normalized["current_used_item_ids"],
+        "answer_submission_prompt": answer_submission_prompt(),
     }
 
 
@@ -1023,6 +1128,7 @@ def pending_round(state: dict) -> dict:
 def handle_append_log(args: argparse.Namespace) -> tuple[dict, int]:
     path = Path(args.state)
     state = load_state(path)
+    require_confirmed_identity(state)
     target = pending_round(state)
     previous_remediation = copy.deepcopy(target.get("remediation"))
     skip_remediation = bool(getattr(args, "student_skipped_remediation", False))
@@ -1114,6 +1220,7 @@ def handle_append_log(args: argparse.Namespace) -> tuple[dict, int]:
 def handle_apply_patch(args: argparse.Namespace) -> dict:
     path = Path(args.state)
     state = load_state(path)
+    require_confirmed_identity(state)
     if not profile_is_ready(state.get("profile")):
         raise ValueError("没有可回写的有效画像")
     value = load_object(Path(args.patch), "profile patch")
@@ -1208,6 +1315,9 @@ def integration_checks() -> dict:
     skill_root = Path(__file__).resolve().parent.parent
     skill_text = (skill_root / "SKILL.md").read_text(encoding="utf-8")
     copy_policy_text = (skill_root / "references" / "copy-policy.md").read_text(encoding="utf-8")
+    state_contract_text = (skill_root / "references" / "state-contract.md").read_text(
+        encoding="utf-8"
+    )
     diagnostic_text = (skill_root / "references" / "diagnostic-workflow.md").read_text(encoding="utf-8")
     scope_digest_text = (skill_root / "assets" / "scope-digest.md").read_text(encoding="utf-8")
     task_workflow_text = (skill_root / "references" / "task-workflow.md").read_text(encoding="utf-8")
@@ -1218,6 +1328,40 @@ def integration_checks() -> dict:
             "内部执行必须静默",
             "报告流程清楚了。现在跑报告命令",
             "这句话是在帮助学生学习，还是在描述系统怎样工作",
+        )
+    )
+    safe_submission_copy = answer_submission_prompt()
+    checks["answer_submission_no_leak_policy"] = (
+        safe_submission_copy
+        == "请按题目显示的编号依次作答，全部完成后一次发给我即可。"
+        and all(
+            marker not in safe_submission_copy
+            for marker in ("比如", "例如", "示例", "参考答案")
+        )
+        and all(
+            marker in skill_text
+            + "\n"
+            + copy_policy_text
+            + "\n"
+            + diagnostic_text
+            + "\n"
+            + task_workflow_text
+            for marker in (
+                "不得提供任何作答示例",
+                "answer_submission_prompt",
+                "请按题目显示的编号依次作答，全部完成后一次发给我即可。",
+            )
+        )
+    )
+    checks["identity_confirmation_policy"] = all(
+        marker in skill_text + "\n" + copy_policy_text + "\n" + state_contract_text
+        for marker in (
+            "每次 Skill 新触发",
+            "needs_identity_confirmation",
+            "请问你是",
+            "确认前不得出题",
+            "保留旧档案",
+            "confirm-identity",
         )
     )
     checks["free_reading_topic_policy"] = all(
@@ -1481,6 +1625,62 @@ def integration_checks() -> dict:
             },
         )
 
+        activated = handle_activate(argparse.Namespace(state=str(state_path)))
+        try:
+            handle_append_pack(
+                argparse.Namespace(state=str(state_path), pack=str(pack_path))
+            )
+        except ValueError as exc:
+            identity_gate_blocked_pack = "needs_identity_confirmation" in str(exc)
+        else:
+            identity_gate_blocked_pack = False
+        confirmed = handle_confirm_identity(
+            argparse.Namespace(state=str(state_path), answer="yes")
+        )
+        confirmed_state = load_state(state_path)
+        checks["existing_profile_identity_gate"] = (
+            activated["phase"] == "needs_identity_confirmation"
+            and activated["identity_confirmation"]["student_prompt"]
+            == "请问你是演示同学吗？"
+            and identity_gate_blocked_pack
+            and confirmed["phase"] == "ready_for_task"
+            and confirmed["identity_confirmed"] is True
+            and confirmed_state["learner"]["name"] == "演示同学"
+            and confirmed_state["profile"]["strategy"]["code"] == "B"
+        )
+
+        decline_state_path = root / "decline-state.json"
+        atomic_write_json(decline_state_path, confirmed_state)
+        declined_activation = handle_activate(
+            argparse.Namespace(state=str(decline_state_path))
+        )
+        declined = handle_confirm_identity(
+            argparse.Namespace(state=str(decline_state_path), answer="no")
+        )
+        declined_new_path = Path(declined["state"])
+        declined_new_state = load_state(declined_new_path)
+        declined_old_state = load_state(decline_state_path)
+        checks["different_student_starts_fresh_state"] = (
+            declined_activation["phase"] == "needs_identity_confirmation"
+            and declined["phase"] == "needs_diagnostic"
+            and declined["previous_state"] == str(decline_state_path)
+            and declined_new_path != decline_state_path
+            and declined.get("learner_intake", {}).get("student_prompt")
+            == learner_intake_payload()["student_prompt"]
+            and declined_new_state["profile"] is None
+            and declined_new_state["learner"] == {}
+            and declined_old_state["profile"]["strategy"]["code"] == "B"
+        )
+
+        legacy_state_path = root / "legacy-state.json"
+        legacy_state = copy.deepcopy(confirmed_state)
+        legacy_state.pop("identity_confirmation")
+        atomic_write_json(legacy_state_path, legacy_state)
+        checks["legacy_state_identity_default"] = (
+            load_state(legacy_state_path)["identity_confirmation"]
+            == default_identity_confirmation()
+        )
+
         bad_scope = load_object(pack_path, "task pack")
         bad_scope["session"]["units"] = ["Unit 9"]
         try:
@@ -1674,7 +1874,7 @@ def integration_checks() -> dict:
                 ],
             },
         )
-        handle_append_pack(
+        remediation_pack_result = handle_append_pack(
             argparse.Namespace(
                 state=str(remediation_state_path), pack=str(remediation_pack_path)
             )
@@ -1738,7 +1938,9 @@ def integration_checks() -> dict:
         remediation_state = load_state(remediation_state_path)
         resolved_log = remediation_state["rounds"][0]["normalized_log"]
         checks["wrong_answer_remediation_gate"] = (
-            retry1_code == 0
+            remediation_pack_result.get("answer_submission_prompt")
+            == answer_submission_prompt()
+            and retry1_code == 0
             and retry1["phase"] == "needs_remediation"
             and retry1["practice_guidance"]["action"] == "retry_with_hint"
             and retry1["practice_guidance"]["next_hints_used"] == 1
@@ -1968,6 +2170,13 @@ def build_parser() -> argparse.ArgumentParser:
     init_cmd.add_argument("--learner")
     init_cmd.add_argument("--force", action="store_true")
 
+    activate_cmd = sub.add_parser("activate", help="每次触发时检查已有档案并建立身份确认门")
+    activate_cmd.add_argument("--state", required=True)
+
+    confirm_cmd = sub.add_parser("confirm-identity", help="确认是否沿用已有学生档案")
+    confirm_cmd.add_argument("--state", required=True)
+    confirm_cmd.add_argument("--answer", required=True, choices=("yes", "no"))
+
     status_cmd = sub.add_parser("status", help="查看下一阶段")
     status_cmd.add_argument("--state", required=True)
 
@@ -2023,6 +2232,8 @@ def main() -> None:
     args = build_parser().parse_args()
     handlers = {
         "init": handle_init,
+        "activate": handle_activate,
+        "confirm-identity": handle_confirm_identity,
         "status": handle_status,
         "adopt-profile": handle_adopt_profile,
         "diagnose": handle_diagnose,

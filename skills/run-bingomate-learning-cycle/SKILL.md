@@ -30,19 +30,21 @@ description: 缤果学伴（BingoMate）完整智能教辅闭环。用《2026 �
 6. 报告完成后自动合并 `profile_patch`，但不自动更改 A/B/C；策略变化必须重新摸底。
 7. 所有用户可见话术以 [references/copy-policy.md](references/copy-policy.md) 为唯一规则：学生和家长只显示单元粒度，内部仍保留精确定位。
 8. 每道任务强制有会话内唯一 `item_id`；作答用 `responses[].item_id` 关联，`seq` 只用于展示，`qid` / `locator` 只用于回源。
+9. 每次新的 Skill 触发都先执行 `activate`。已有有效画像时必须先用一句“请问你是 XXX 吗？”确认身份；确认前不得出题。学生确认是本人后沿用画像、跳过建模；确认不是本人后保留旧档案，改用脚本新建的状态重新建档与摸底。
 
 ## 阶段路由
 
-以下命令和阶段值全部用于内部编排，不向学生或家长展示，也不在运行前发送过程性说明。先静默运行：
+以下命令和阶段值全部用于内部编排，不向学生或家长展示，也不在运行前发送过程性说明。**每次 Skill 新触发时**先静默运行；同一次连续对话中的答题、订正和收尾只用 `status` 续接，不要重复确认：
 
 ```bash
-python scripts/cycle_engine.py status --state state.json
+python scripts/cycle_engine.py activate --state state.json
 ```
 
 按返回的 `phase` 只执行一个阶段：
 
 | phase | 当前状态 | 下一步 |
 | --- | --- | --- |
+| `needs_identity_confirmation` | 找到已有有效画像，尚未确认当前学生 | 只发送 `identity_confirmation.student_prompt` 并等待“是 / 不是” |
 | `needs_diagnostic` | 尚无有效画像 | 建档、摸底并运行画像判定 |
 | `ready_for_task` | 已有画像，无待完成任务 | 按画像生成一轮任务 |
 | `awaiting_responses` | 已发任务，尚无作答记录 | 讲题并记录原始作答与提示 |
@@ -52,9 +54,23 @@ python scripts/cycle_engine.py status --state state.json
 
 用户只要求某一阶段时，在该阶段交付后停止。用户要求完整演示时，阶段之间仍要等待真实回答；不得替学生作答后一路跑完。
 
+`needs_identity_confirmation` 是出题前的硬门禁：不得一边询问身份一边展示题目，也不得根据称呼自行判定。学生回答“是”后，静默运行：
+
+```bash
+python scripts/cycle_engine.py confirm-identity --state state.json --answer yes
+```
+
+沿用返回的同一状态与画像；若没有未完成轮次，直接进入 `ready_for_task` 出题，不再询问年级、已学单元等建档信息。学生回答“不是”后，静默运行：
+
+```bash
+python scripts/cycle_engine.py confirm-identity --state state.json --answer no
+```
+
+必须改用返回的 `state` 新路径并发送其中的 `learner_intake.student_prompt`，重新建档与摸底；`previous_state` 仅供内部保留，不能覆盖或删除原学生档案。回答含糊时只自然追问一次是否本人，不继续后续阶段。
+
 ## 第一次启动或接入已有画像
 
-新建状态：
+`activate` 在指定状态不存在时会自动新建空状态。只有离线准备或显式导入时才需要单独使用 `init`：
 
 ```bash
 python scripts/cycle_engine.py init --state state.json --learner learner.json
@@ -85,14 +101,15 @@ python scripts/cycle_engine.py adopt-profile --state state.json --profile profil
 3. 阅读主题由模型自由构思，不设主题池。只约束已学单元的考点、语言难度、90–120 词篇幅和阅读题型；不得复述、缩写或轻微改写教材语篇、Skill 示例或本次其他题目的情境。
 4. 把 `session_id` 当作内部变化种子：同一会话沿用已生成题目，不同会话重新创作；构思和选择过程不对用户解释。
 5. 生成题同时保存题目定义、标准答案和自定义 `qid`；不得只保存 `qid + response`。
-6. 收齐作答后静默运行，不先向用户说明脚本或判分流程：
+6. 全部题目发完后，只发送固定安全收答提示：**“请按题目显示的编号依次作答，全部完成后一次发给我即可。”** 不得提供任何作答示例，不得用当前题目的选项、单词或标准答案演示回复格式。
+7. 收齐作答后静默运行，不先向用户说明脚本或判分流程：
 
 ```bash
 python scripts/cycle_engine.py diagnose --state state.json --session diagnostic-session.json
 ```
 
-7. 若标准答案不能覆盖生成题的等价表达，按输入契约在内部补 `model_judgment` 后重试。教辅锚题不得被模型覆盖。
-8. 向孩子反馈做对多少、强弱点和下一步安排，不展示 JSON 或技术恢复过程。
+8. 若标准答案不能覆盖生成题的等价表达，按输入契约在内部补 `model_judgment` 后重试。教辅锚题不得被模型覆盖。
+9. 向孩子反馈做对多少、强弱点和下一步安排，不展示 JSON 或技术恢复过程。
 
 ## 阶段二：按画像生成学习任务
 
@@ -122,6 +139,8 @@ python scripts/cycle_engine.py diagnose --state state.json --session diagnostic-
 ```bash
 python scripts/cycle_engine.py append-pack --state state.json --pack task-pack.json
 ```
+
+发题后直接使用返回的 `answer_submission_prompt`，不要自行补充“比如 / 例如”或任何带字母、单词、短语的答案格式示例。即使只想说明排版，也不得把模型已知的标准答案写进示例。
 
 只要求出任务时到此停止。
 

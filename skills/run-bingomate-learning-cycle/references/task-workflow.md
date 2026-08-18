@@ -156,6 +156,8 @@
 python scripts/cycle_engine.py append-pack --state state.json --pack task_pack.json
 ```
 
+直接把任务发给学生，并以返回的 `answer_submission_prompt` 收尾。不得提供任何作答示例，不得自行用当前题目的答案演示“1—N 应该怎么发”；固定文案为：“请按题目显示的编号依次作答，全部完成后一次发给我即可。”
+
 这一轮做完再通过 `append-log` 回填作答。状态机自己配对任务与日志，调用方不用攒散文件；不要手工重写 `state.json`。
 
 **到这里是一次交付的终点。** 孩子还没做题，没有作答记录就没有报告，不要接着往下编。

@@ -23,7 +23,14 @@
   "reports": [],
   "latest_report": null,
   "profile_observations": [],
-  "strategy_history": []
+  "strategy_history": [],
+  "identity_confirmation": {
+    "required": false,
+    "confirmed": true,
+    "learner_name": "小宇",
+    "requested_at": "2026-08-12T14:41:00+08:00",
+    "confirmed_at": "2026-08-12T14:41:05+08:00"
+  }
 }
 ```
 
@@ -34,17 +41,26 @@
 - `reports` 保存报告元数据；完整报告写到命令指定的输出目录。
 - `profile_observations` 保存每次回写的原始补丁与 `observed_at`，用于追溯，不冒充跨会话趋势。
 - `strategy_history` 只在显式 `rediagnose` 成功时保存被替换的旧画像和策略。
+- `identity_confirmation` 是本次 Skill 触发的身份门禁。它不代替画像，也不把确认结果写进学习成绩；旧版状态缺少该字段时由脚本自动补齐。
 
 ## 二、阶段计算
 
-阶段不是让模型猜的，由 `status` 计算：
+每次 Skill 新触发先由 `activate` 检查指定状态；同一次连续学习过程再由 `status` 计算阶段：
 
-1. 无有效画像：`needs_diagnostic`
-2. 有错题等待提示后重答、讲解或确认：`needs_remediation`
-3. 有未归一化作答且入口报告问题：`needs_internal_repair`
-4. 有任务包但尚无作答：`awaiting_responses`
-5. 有尚未报告的真实作答：`ready_for_report`。这个值表示“已具备报告条件、正在等待学生选择”，不是自动出报告；固定等待结束、继续或讲解三选一
-6. 其余有画像状态：`ready_for_task`
+1. 找到有效画像但本次尚未确认身份：`needs_identity_confirmation`
+2. 无有效画像：`needs_diagnostic`
+3. 有错题等待提示后重答、讲解或确认：`needs_remediation`
+4. 有未归一化作答且入口报告问题：`needs_internal_repair`
+5. 有任务包但尚无作答：`awaiting_responses`
+6. 有尚未报告的真实作答：`ready_for_report`。这个值表示“已具备报告条件、正在等待学生选择”，不是自动出报告；固定等待结束、继续或讲解三选一
+7. 其余有画像状态：`ready_for_task`
+
+`activate` 的身份分支是确定性的：
+
+- 状态不存在或没有有效画像：不询问身份，进入 `needs_diagnostic`。
+- 已有有效画像：写入待确认门禁，只返回一句 `identity_confirmation.student_prompt`。在 `confirm-identity` 成功前，`append-pack` 等后续动作会被阶段门禁拒绝。
+- 回答 `yes`：继续使用原状态、原画像和未完成轮次；没有未完成轮次时直接进入 `ready_for_task`，跳过画像建模。
+- 回答 `no`：在原状态旁创建一份带新 `session_id` 的状态，返回新 `state` 路径并进入 `needs_diagnostic`；旧状态不覆盖、不删除。
 
 新诊断若所有作答均为空或不可评分，仍可产出内部临时 B 策略，但 `item_count=0`，状态继续停在 `needs_diagnostic`，不得据此推学习任务。
 
@@ -90,6 +106,9 @@
 ## 六、命令
 
 ```bash
+python scripts/cycle_engine.py activate --state state.json
+python scripts/cycle_engine.py confirm-identity --state state.json --answer yes
+python scripts/cycle_engine.py confirm-identity --state state.json --answer no
 python scripts/cycle_engine.py init --state state.json [--learner learner.json]
 python scripts/cycle_engine.py status --state state.json
 python scripts/cycle_engine.py diagnose --state state.json --session diagnostic-session.json
@@ -111,6 +130,8 @@ python scripts/cycle_engine.py validate
 ```
 
 这类内容只供智能体修复，不能原样发给学生或家长。
+
+`activate` 是每次新触发的唯一入口，不是每条学生消息都调用。返回 `needs_identity_confirmation` 时，只发送 `identity_confirmation.student_prompt`；不要展示字段、阶段或命令。`confirm-identity --answer no` 返回的新 `state` 路径从此作为当前学生状态，旧路径留给原学生。
 
 `status` 和 `append-log` 在 `needs_remediation` 时返回 `practice_guidance`。模型只发送其中的学生话术并等待真实重答，不展示收尾选择；只有学生明确拒绝订正时才可使用 `--student-skipped-remediation`。
 
