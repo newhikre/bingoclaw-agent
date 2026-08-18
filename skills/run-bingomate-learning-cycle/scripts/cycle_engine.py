@@ -1364,6 +1364,7 @@ def integration_checks() -> dict:
             "confirm-identity",
         )
     )
+    checks["explicit_learning_53_trigger"] = "我要学习53" in skill_text.split("---", 2)[1]
     checks["free_reading_topic_policy"] = all(
         marker in skill_text + "\n" + diagnostic_text + "\n" + scope_digest_text + "\n" + copy_policy_text
         for marker in (
